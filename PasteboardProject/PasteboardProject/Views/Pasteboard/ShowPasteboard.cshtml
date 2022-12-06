@@ -1,0 +1,16 @@
+@using PasteboardProject.Models
+@model Pasteboard
+
+
+<h2 class="text-center">@Model.Name</h2>
+<br/>
+<body class="text-center">
+    @foreach (var pf in Model.PasteboardFields)
+    {
+        @*<a class="btn btn-primary-soft lift"><a href="http://@pf.FieldValue">@pf.FieldName</a></a><br/>  *@
+        <a href="http://@pf.FieldValue" class="btn btn-lg bd-btn-lg btn-outline-secondary gap-2 col-4 mx-auto" onclick="ga('send', 'event', 'Examples', 'Hero', 'Download');">
+            @pf.FieldName
+        </a><br/>                                     
+    }
+</body>
+

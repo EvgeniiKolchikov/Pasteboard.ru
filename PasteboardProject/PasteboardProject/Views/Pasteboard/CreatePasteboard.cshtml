@@ -1,0 +1,18 @@
+@model PasteboardProject.Models.Pasteboard
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "_Layout";
+}
+
+<h2 class="text-center">Create Pasteboard</h2>
+<br/>
+<body>
+<form asp-controller="Pasteboard" asp-action="CreatePasteboard" method="post">
+    <label asp-for="Name"></label>
+    <input asp-for="Name" type="text"/>
+    <span asp-validation-for="Name"></span>
+    <input type="submit"/>
+</form>
+
+</body>
