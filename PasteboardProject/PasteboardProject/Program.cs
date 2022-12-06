@@ -22,6 +22,6 @@ var app = builder.Build();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Pasteboard}/{action=Index}/{id=1}");
+    pattern: "{controller=Pasteboard}/{action=ShowPasteboard}/{id=1}");
 
 app.Run();
