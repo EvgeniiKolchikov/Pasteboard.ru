@@ -1,3 +1,4 @@
+@using PasteboardProject.Models
 @model PasteboardProject.Models.Pasteboard
 
 @{
@@ -7,12 +8,29 @@
 
 <h2 class="text-center">Create Pasteboard</h2>
 <br/>
-<body>
-<form asp-controller="Pasteboard" asp-action="CreatePasteboard" method="post">
-    <label asp-for="Name"></label>
-    <input asp-for="Name" type="text"/>
-    <span asp-validation-for="Name"></span>
-    <input type="submit"/>
-</form>
+<form asp-action="CreatePasteboard" asp-controller="Pasteboard">
+<div>
+    <div class="d-grid gap-2 col-4 mx-auto"  asp-controller="Pasteboard" asp-action="CreatePasteboard" method="post">
+         <input class="text-center" asp-for="Name" type="text" placeholder="Pasteboeard Name"/>
+    <br/>
+    </div>
+    <br/>
+    <div>
+        @for (int i = 0; i < 3; i++)
+        {
+            <div class="d-grid gap-2 col-4 mx-auto">
+                <input class="text-center" asp-for="@Model.PasteboardFields[i].FieldName" type="text" placeholder="Field Name"/>
+                <input class="text-center" asp-for="@Model.PasteboardFields[i].FieldValue" type="text" placeholder="Field Url"/>
+                <br/>
+             </div>
+        }
+    </div>
 
-</body>
+
+<div class="d-grid gap-2 col-4 justify-content-md-end">
+    <input class="btn btn-outline-secondary justify-content-end" type="submit"/>
+</div>
+
+</div>
+
+</form>
