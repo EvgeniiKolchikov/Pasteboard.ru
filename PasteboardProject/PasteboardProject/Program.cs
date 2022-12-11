@@ -14,7 +14,7 @@ var app = builder.Build();
 // }
 //
 // app.UseHttpsRedirection();
-// app.UseStaticFiles();
+app.UseStaticFiles();
 //
 // app.UseRouting();
 //
@@ -22,6 +22,6 @@ var app = builder.Build();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Pasteboard}/{action=ShowPasteboard}/{id=1}");
+    pattern: "{controller=Pasteboard}/{action=ShowPasteboard}/{id?}");
 
 app.Run();
