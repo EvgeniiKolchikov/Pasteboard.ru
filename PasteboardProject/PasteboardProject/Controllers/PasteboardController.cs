@@ -17,32 +17,47 @@ public class PasteboardController : Controller
     public IActionResult ShowPasteboard(int id)
     {
         var pasteboardById = pasteboardRepository.GetPasteboardById(id);
+        var activeFields = pasteboardById.PasteboardFields.Where(pf => pf.FieldName != null && pf.FieldValue != null);
+        pasteboardById.PasteboardFields = activeFields.ToList();
         return View(pasteboardById);
     }
     
     [HttpGet]
     public IActionResult CreatePasteboard()
     {
-        return View();
+        ViewBag.Header = "Create";
+        var pasteboard = new Pasteboard
+        {
+            PasteboardFields = new List<PasteboardField>
+            {
+                new PasteboardField(),
+                new PasteboardField(),
+                new PasteboardField(),
+                new PasteboardField(),
+                new PasteboardField(),
+                new PasteboardField(),
+                new PasteboardField(),
+                new PasteboardField(),
+                new PasteboardField(),
+                new PasteboardField()
+            }
+        };
+        return View("CreateEditPasteboard",pasteboard);
     }
 
     [HttpPost]
-    // public IActionResult CreatePasteboard(Pasteboard pasteboard)
-    // {
-    //     var lastId = pasteboardRepository.Pasteboards.Count;
-    //     pasteboard.Id = lastId + 1;
-    //     pasteboardRepository.CreatePasteboard(pasteboard);
-    //     var count = pasteboardRepository.Pasteboards.Count;
-    //     Log.Debug("CardController created");
-    //     return RedirectToAction("ShowPasteboard", pasteboard);
-    // }
     public async Task<IActionResult> CreatePasteboard(Pasteboard pasteboard)
     {
-        var lastId = pasteboardRepository.Pasteboards.Count;
-        pasteboard.Id = lastId + 1;
-        pasteboardRepository.Pasteboards.Add(pasteboard);
-        await pasteboardRepository.AddCardToJsonAsync();
-        object id = pasteboard.Id;
-        return View();
+        await pasteboardRepository.AddCardToJsonAsync(pasteboard);
+        var id = pasteboard.Id;
+        return RedirectToAction("ShowPasteboard", new {id});
+    }
+
+    [HttpGet]
+    public IActionResult EditPasteboard(int id)
+    {
+        ViewBag.Header = "Edit";
+        var pasteboardById = pasteboardRepository.GetPasteboardById(id);
+        return View("CreateEditPasteboard", pasteboardById);
     }
 }
