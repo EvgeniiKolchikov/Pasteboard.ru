@@ -6,7 +6,7 @@
     Layout = "_Layout";
 }
 
-<h2 class="text-center">Create Pasteboard</h2>
+<h2 class="text-center">@ViewBag.Header Pasteboard</h2>
 <br/>
 <form asp-action="CreatePasteboard" asp-controller="Pasteboard" method="post">
     <div class="text-center gap-2 col-6 mx-auto">
@@ -17,7 +17,7 @@
         <div>
             <div class="show-hide-element" style="display: block">
                 <input class="text-center gap-2 col-2 mx-auto" asp-for="@Model.PasteboardFields[0].FieldName"  type="text" placeholder="Field Name"/>
-                <input class="text-center gap-2 col-3 mx-auto" asp-for="@Model.PasteboardFields[0].FieldValue" type="text" placeholder="Field Url"/>
+                <input class="text-center gap-2 col-4 mx-auto" asp-for="@Model.PasteboardFields[0].FieldValue" type="text" placeholder="Field Url"/>
                 <br/>
             </div>
             @{
@@ -25,7 +25,7 @@
                 {
                     <div class="show-hide-element" style="display: none">
                          <input class="text-center gap-2 col-2 mx-auto" asp-for="@Model.PasteboardFields[i].FieldName"  type="text" placeholder="Field Name"/>
-                         <input class="text-center gap-2 col-3 mx-auto" asp-for="@Model.PasteboardFields[i].FieldValue" type="text" placeholder="Field Url"/>
+                         <input class="text-center gap-2 col-4 mx-auto" asp-for="@Model.PasteboardFields[i].FieldValue" type="text" placeholder="Field Url"/>
                          <br/>
                     </div>
                 }
