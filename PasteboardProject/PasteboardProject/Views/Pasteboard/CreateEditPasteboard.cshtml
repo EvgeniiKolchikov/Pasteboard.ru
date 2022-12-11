@@ -1,0 +1,45 @@
+@using PasteboardProject.Models
+@model PasteboardProject.Models.Pasteboard
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "_Layout";
+}
+
+<h2 class="text-center">Create Pasteboard</h2>
+<br/>
+<form asp-action="CreatePasteboard" asp-controller="Pasteboard" method="post">
+    <div class="text-center gap-2 col-6 mx-auto">
+        <div>
+            <input class="text-center gap-2 col-4 mx-auto" asp-for="Name" type="text" placeholder="Pasteboard Name"/><br/>
+        </div>
+        <br/>
+        <div>
+            <div class="show-hide-element" style="display: block">
+                <input class="text-center gap-2 col-2 mx-auto" asp-for="@Model.PasteboardFields[0].FieldName"  type="text" placeholder="Field Name"/>
+                <input class="text-center gap-2 col-3 mx-auto" asp-for="@Model.PasteboardFields[0].FieldValue" type="text" placeholder="Field Url"/>
+                <br/>
+            </div>
+            @{
+                for (int i = 1; i < Model.PasteboardFields.Count; i++)
+                {
+                    <div class="show-hide-element" style="display: none">
+                         <input class="text-center gap-2 col-2 mx-auto" asp-for="@Model.PasteboardFields[i].FieldName"  type="text" placeholder="Field Name"/>
+                         <input class="text-center gap-2 col-3 mx-auto" asp-for="@Model.PasteboardFields[i].FieldValue" type="text" placeholder="Field Url"/>
+                         <br/>
+                    </div>
+                }
+                
+            }
+        </div>
+            <div>
+                <a class="btn btn-outline-secondary gap-2 col-2 mx-auto" type="button" onclick="addElement()">Добавить</a>
+            </div>
+            <div>
+                <a class="btn btn-outline-secondary gap-2 col-2 mx-auto" type="button" onclick="deleteElement()">Удалить</a>
+            </div>
+            <div>
+                <input class="btn btn-outline-secondary" type="submit"/>
+            </div>
+        </div>
+</form>
