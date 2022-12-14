@@ -1,4 +1,5 @@
 using System.Text.Json;
+using NLog.Fluent;
 using PasteboardProject.Models;
 
 namespace PasteboardProject.Repositories;
@@ -33,10 +34,19 @@ public class PasteboardRepositoryJson
 
     public async Task AddCardToJsonAsync(Pasteboard pasteboard)
     {
-        var lastId = Pasteboards.Count;
-        pasteboard.Id = lastId + 1;
-        Pasteboards.Add(pasteboard);
-        using (var fs = new FileStream("pasteboard.json",FileMode.OpenOrCreate))
+        var idExist = Pasteboards.Select(p => p.Id).Any(id => id == pasteboard.Id);
+        
+        if (!idExist)
+        {
+            var lastId = Pasteboards.Count;
+            pasteboard.Id = lastId + 1;
+            Pasteboards.Add(pasteboard);
+        }
+        else
+        {
+            Pasteboards[pasteboard.Id - 1] = pasteboard;
+        }
+        using (var fs = new FileStream("pasteboard.json",FileMode.Create))
         {
             await JsonSerializer.SerializeAsync(fs, Pasteboards);
         }
@@ -45,11 +55,17 @@ public class PasteboardRepositoryJson
     public async Task<List<Pasteboard>> GetAllPasteboardsFromJsonAsync()
     {
         var list = new List<Pasteboard>();
-        using (var fs = new FileStream("pasteboard.json", FileMode.Open))
+        try
         {
-            list = await JsonSerializer.DeserializeAsync<List<Pasteboard>>(fs);
+            using (var fs = new FileStream("pasteboard.json", FileMode.Open))
+            {
+                list = await JsonSerializer.DeserializeAsync<List<Pasteboard>>(fs);
+            }
         }
-
+        catch (Exception e)
+        {
+            
+        }
         return list;
     }
 
