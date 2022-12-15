@@ -41,16 +41,22 @@ public class PasteboardController : Controller
     [HttpPost]
     public async Task<IActionResult> CreatePasteboard(Pasteboard pasteboard)
     {
-        if (ModelState.IsValid)
+        if (string.IsNullOrEmpty(pasteboard.Name))
         {
-            await pasteboardRepository.AddCardToJsonAsync(pasteboard);
-            var id = pasteboard.Id;
-            return RedirectToAction("ShowPasteboard", new {id});
+            ModelState.AddModelError("Name","Введите имя");
         }
-        else
+        if (string.IsNullOrEmpty(pasteboard.PasteboardFields[0].FieldName) && string.IsNullOrEmpty(pasteboard.PasteboardFields[0].FieldValue))
+        {
+            ModelState.AddModelError("FieldName","Введите имя поля");
+            ModelState.AddModelError("FieldValue","Введите ссылку");
+        }
+        if (!ModelState.IsValid)
         {
             return View("CreateEditPasteboard", pasteboard);
         }
+        await pasteboardRepository.AddCardToJsonAsync(pasteboard);
+        var id = pasteboard.Id;
+        return RedirectToAction("ShowPasteboard", new {id});
     }
 
     [HttpGet]

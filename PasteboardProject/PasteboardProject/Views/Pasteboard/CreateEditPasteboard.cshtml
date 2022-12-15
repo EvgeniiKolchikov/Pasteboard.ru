@@ -22,20 +22,24 @@
             @{
                 if (countActiveFields == 0)
                 {
-                    var showedElements = 3;
-                    for (int i = 0; i < showedElements; i++)
+                    var standardShowedElements = 2;
+                    for (int i = 0; i < standardShowedElements; i++)
                     {
                         <div class="show-hide-element" style="display: block">
                             <input type="text" class="text-center  mx-auto form-control" asp-for="@Model.PasteboardFields[i].FieldName"  placeholder="Field Name"/>
+                            @Html.ValidationMessage("FieldName")
                             <input type="text" class="text-center  mx-auto form-control" asp-for="@Model.PasteboardFields[i].FieldValue"  placeholder="Field Url"/>
+                            @Html.ValidationMessage("FieldValue")
                             <br/>
                         </div>
                     }
-                    for (int i = showedElements; i < countAllPasteboardField; i++)
+                    for (int i = standardShowedElements; i < countAllPasteboardField; i++)
                     {
                         <div class="show-hide-element" style="display: none">
                             <input type="text" class="text-center  mx-auto form-control" asp-for="@Model.PasteboardFields[i].FieldName"  placeholder="Field Name"/>
+                            @Html.ValidationMessage("FieldName")
                             <input type="text" class="text-center  mx-auto form-control" asp-for="@Model.PasteboardFields[i].FieldValue"  placeholder="Field Url"/>
+                            @Html.ValidationMessage("FieldValue")
                             <br/>
                         </div>
                     }
