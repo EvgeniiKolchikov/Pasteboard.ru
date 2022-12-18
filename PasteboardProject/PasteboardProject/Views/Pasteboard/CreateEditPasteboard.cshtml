@@ -1,77 +1,38 @@
-@model PasteboardProject.Models.Pasteboard
+@model PasteboardProject.Models.ViewModels.PasteboardViewModel
 
 @{
-    var countAllPasteboardField = Model.PasteboardFields.Count;
-    var countActiveFields = Model.PasteboardFields.Count(pf => pf.FieldName != null && pf.FieldValue != null);
-    var header = countActiveFields == 0 ? "Create" : "Edit";
-    var aspAction = countActiveFields == 0 ? "CreatePasteboard" : "EditPasteboard";
-
     Layout = "_Layout";
 }
 
-<h2 class="text-center">@header Pasteboard</h2>
+<h2 class="text-center"> Pasteboard</h2>
 <br/>
-<form asp-action="@aspAction" asp-controller="Pasteboard" method="post">
+<form asp-action="" asp-controller="Pasteboard" method="post">
     <div class="text-center gap-2 col-4 mx-auto">
         <div>
-            <input type="text" class="text-center gap-2 col-4 mx-auto form-control" asp-for="Name" placeholder="Введите имя или ник"/>
-            <span asp-validation-for="Name" class="text-danger"></span><br/>
+            <input type="text" class="text-center gap-2 col-4 mx-auto form-control" asp-for="Pasteboard.Name" placeholder="Введите имя или ник"/>
+            <span asp-validation-for="Pasteboard.Name" class="text-danger"></span><br/>
         </div>
         <br/>
         <div>
-            @{
-                if (countActiveFields == 0)
+
+            @if (@Model.Pasteboard.PasteboardFields != null)
+            {
+                for (int i = 0; i < @Model.Pasteboard.PasteboardFields.Count; i++)
                 {
-                    var standardShowedElements = 2;
-                    for (int i = 0; i < standardShowedElements; i++)
-                    {
-                        <div class="show-hide-element" style="display: block">
-                            <input type="text" class="text-center  mx-auto form-control" asp-for="@Model.PasteboardFields[i].FieldName"  placeholder="Field Name"/>
-                            @Html.ValidationMessage("FieldName")
-                            <input type="text" class="text-center  mx-auto form-control" asp-for="@Model.PasteboardFields[i].FieldValue"  placeholder="Field Url"/>
-                            @Html.ValidationMessage("FieldValue")
-                            <br/>
-                        </div>
-                    }
-                    for (int i = standardShowedElements; i < countAllPasteboardField; i++)
-                    {
-                        <div class="show-hide-element" style="display: none">
-                            <input type="text" class="text-center  mx-auto form-control" asp-for="@Model.PasteboardFields[i].FieldName"  placeholder="Field Name"/>
-                            @Html.ValidationMessage("FieldName")
-                            <input type="text" class="text-center  mx-auto form-control" asp-for="@Model.PasteboardFields[i].FieldValue"  placeholder="Field Url"/>
-                            @Html.ValidationMessage("FieldValue")
-                            <br/>
-                        </div>
-                    }
-                }
-                else
-                {
-                    var showedElements = countActiveFields;
-                    for (var i = 0; i < showedElements; i++)
-                    {
-                        <div class="show-hide-element" style="display: block">
-                            <input class="text-center gap-2 col-2 mx-auto" asp-for="@Model.PasteboardFields[i].FieldName" type="text" placeholder="Field Name"/>
-                            <input class="text-center gap-2 col-4 mx-auto" asp-for="@Model.PasteboardFields[i].FieldValue" type="text" placeholder="Field Url"/>
-                            <br/>
-                        </div>
-                    }
-                    for (var i = showedElements; i < countAllPasteboardField; i++)
-                    {
-                        <div class="show-hide-element" style="display: none">
-                            <input class="text-center gap-2 col-2 mx-auto" asp-for="@Model.PasteboardFields[i].FieldName" type="text" placeholder="Field Name"/>
-                            <input class="text-center gap-2 col-4 mx-auto" asp-for="@Model.PasteboardFields[i].FieldValue" type="text" placeholder="Field Url"/>
-                            <br/>
-                        </div>
-                    }
+                    <div class="show-hide-element" style="display: block">
+                        <input type="text" class="text-center  mx-auto form-control" asp-for="@Model.Pasteboard.PasteboardFields[i].FieldName))" placeholder="Field Name"/>
+                        <input type="text" class="text-center  mx-auto form-control" asp-for="@Model.Pasteboard.PasteboardFields[i].FieldValue))" placeholder="Field Url"/>
+                         <div>
+                            <a class="btn btn-outline-secondary gap-2 col-3 mx-auto" type="button" onclick="deleteElement()">Удалить</a>
+                         </div>
+                        <br/>
+                    </div>
                 }
             }
             <br/>
         </div>
             <div>
                 <a class="btn btn-outline-secondary gap-2 col-3 mx-auto" type="button" onclick="addElement()">Добавить</a>
-            </div>
-            <div>
-                <a class="btn btn-outline-secondary gap-2 col-3 mx-auto" type="button" onclick="deleteElement()">Удалить</a>
             </div>
             <div>
                 <input class="btn btn-outline-secondary" type="submit"/>
