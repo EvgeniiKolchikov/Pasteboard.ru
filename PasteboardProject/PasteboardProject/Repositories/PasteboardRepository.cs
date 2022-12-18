@@ -19,12 +19,12 @@ public class PasteboardRepository
             new PasteboardField{FieldName = "ok",FieldValue = "ok.ru",Id = 6,PasteboardId = 3}
         };
         
-        Pasteboards = new List<Pasteboard>
-        {
-            new Pasteboard { Id = 1, Name = "Первый", PasteboardFields = PasteboardFields.Where(pf => pf.PasteboardId == 1).ToList()},
-            new Pasteboard { Id = 2, Name = "Второй", PasteboardFields = PasteboardFields.Where(pf => pf.PasteboardId == 2).ToList()},
-            new Pasteboard { Id = 3, Name = "Третий", PasteboardFields = PasteboardFields.Where(pf => pf.PasteboardId == 3).ToList()}
-        };
+        // Pasteboards = new List<Pasteboard>
+        // {
+        //     new Pasteboard { Id = 1, Name = "Первый", PasteboardFields = PasteboardFields.Where(pf => pf.PasteboardId == 1).ToList()},
+        //     new Pasteboard { Id = 2, Name = "Второй", PasteboardFields = PasteboardFields.Where(pf => pf.PasteboardId == 2).ToList()},
+        //     new Pasteboard { Id = 3, Name = "Третий", PasteboardFields = PasteboardFields.Where(pf => pf.PasteboardId == 3).ToList()}
+        // };
         
     }
 
