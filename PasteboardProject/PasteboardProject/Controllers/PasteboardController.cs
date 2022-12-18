@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using NLog.Fluent;
 using PasteboardProject.Models;
+using PasteboardProject.Models.ViewModels;
 using PasteboardProject.Repositories;
 
 namespace PasteboardProject.Controllers;
@@ -26,45 +27,48 @@ public class PasteboardController : Controller
     [HttpGet]
     public IActionResult CreatePasteboard()
     {
-        var pasteboardFields = new List<PasteboardField>();
+        var pasteboardFields = new List<ActivePasteboardField>();
         for (int i = 0; i < 10; i++)
         {
-            pasteboardFields.Add(new PasteboardField());
+            pasteboardFields.Add(new ActivePasteboardField());
         }
-        var pasteboard = new Pasteboard
+
+        var pasteboard = new Pasteboard();
+        pasteboard.PasteboardFields = pasteboardFields;
+        var pasteboardViewModel = new PasteboardViewModel()
         {
-            PasteboardFields = pasteboardFields
+            Pasteboard = pasteboard
         };
-        return View("CreateEditPasteboard",pasteboard);
+        return View("CreateEditPasteboard",pasteboardViewModel);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> CreatePasteboard(Pasteboard pasteboard)
-    {
-        if (string.IsNullOrEmpty(pasteboard.Name))
-        {
-            ModelState.AddModelError("Name","Введите имя");
-        }
-        if (string.IsNullOrEmpty(pasteboard.PasteboardFields[0].FieldName) && string.IsNullOrEmpty(pasteboard.PasteboardFields[0].FieldValue))
-        {
-            ModelState.AddModelError("FieldName","Введите имя поля");
-            ModelState.AddModelError("FieldValue","Введите ссылку");
-        }
-        if (!ModelState.IsValid)
-        {
-            return View("CreateEditPasteboard", pasteboard);
-        }
-        await pasteboardRepository.AddCardToJsonAsync(pasteboard);
-        var id = pasteboard.Id;
-        return RedirectToAction("ShowPasteboard", new {id});
-    }
+    // [HttpPost]
+    // public async Task<IActionResult> CreatePasteboard(Pasteboard pasteboard)
+    // {
+    //     if (string.IsNullOrEmpty(pasteboard.Name))
+    //     {
+    //         ModelState.AddModelError("Name","Введите имя");
+    //     }
+    //     if (string.IsNullOrEmpty(pasteboard.PasteboardFields[0].FieldName) && string.IsNullOrEmpty(pasteboard.PasteboardFields[0].FieldValue))
+    //     {
+    //         ModelState.AddModelError("FieldName","Введите имя поля");
+    //         ModelState.AddModelError("FieldValue","Введите ссылку");
+    //     }
+    //     if (!ModelState.IsValid)
+    //     {
+    //         return View("CreateEditPasteboard", pasteboard);
+    //     }
+    //     await pasteboardRepository.AddCardToJsonAsync(pasteboard);
+    //     var id = pasteboard.Id;
+    //     return RedirectToAction("ShowPasteboard", new {id});
+    // }
 
-    [HttpGet]
-    public IActionResult EditPasteboard(int id)
-    {
-        var pasteboardById = pasteboardRepository.GetPasteboardById(id);
-        return View("CreateEditPasteboard", pasteboardById);
-    }
+    // [HttpGet]
+    // public IActionResult EditPasteboard(int id)
+    // {
+    //     var pasteboardById = pasteboardRepository.GetPasteboardById(id);
+    //     return View("CreateEditPasteboard", pasteboardById);
+    // }
 
     [HttpPost]
     public async Task<IActionResult> EditPasteboard(Pasteboard pasteboard)
