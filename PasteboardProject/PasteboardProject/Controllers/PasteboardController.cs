@@ -19,62 +19,82 @@ public class PasteboardController : Controller
     public IActionResult ShowPasteboard(int id)
     {
         var pasteboardById = pasteboardRepository.GetPasteboardById(id);
-        var activeFields = pasteboardById.PasteboardFields.Where(pf => pf.FieldName != null && pf.FieldValue != null);
-        pasteboardById.PasteboardFields = activeFields.ToList();
         return View(pasteboardById);
     }
     
     [HttpGet]
     public IActionResult CreatePasteboard()
     {
-        var pasteboardFields = new List<ActivePasteboardField>();
-        for (int i = 0; i < 10; i++)
-        {
-            pasteboardFields.Add(new ActivePasteboardField());
-        }
-
         var pasteboard = new Pasteboard();
-        pasteboard.PasteboardFields = pasteboardFields;
+        pasteboard = AddEmptyFields(pasteboard);
         var pasteboardViewModel = new PasteboardViewModel()
         {
-            Pasteboard = pasteboard
+            Pasteboard = pasteboard,
+            AspAction = "CreatePasteboard"
         };
         return View("CreateEditPasteboard",pasteboardViewModel);
     }
-
-    // [HttpPost]
-    // public async Task<IActionResult> CreatePasteboard(Pasteboard pasteboard)
-    // {
-    //     if (string.IsNullOrEmpty(pasteboard.Name))
-    //     {
-    //         ModelState.AddModelError("Name","Введите имя");
-    //     }
-    //     if (string.IsNullOrEmpty(pasteboard.PasteboardFields[0].FieldName) && string.IsNullOrEmpty(pasteboard.PasteboardFields[0].FieldValue))
-    //     {
-    //         ModelState.AddModelError("FieldName","Введите имя поля");
-    //         ModelState.AddModelError("FieldValue","Введите ссылку");
-    //     }
-    //     if (!ModelState.IsValid)
-    //     {
-    //         return View("CreateEditPasteboard", pasteboard);
-    //     }
-    //     await pasteboardRepository.AddCardToJsonAsync(pasteboard);
-    //     var id = pasteboard.Id;
-    //     return RedirectToAction("ShowPasteboard", new {id});
-    // }
-
-    // [HttpGet]
-    // public IActionResult EditPasteboard(int id)
-    // {
-    //     var pasteboardById = pasteboardRepository.GetPasteboardById(id);
-    //     return View("CreateEditPasteboard", pasteboardById);
-    // }
-
+    
     [HttpPost]
-    public async Task<IActionResult> EditPasteboard(Pasteboard pasteboard)
+    public async Task<IActionResult> CreatePasteboard(PasteboardViewModel pasteboardViewModel)
     {
+        var pasteboardToRepository = new Pasteboard();
+        pasteboardToRepository = DeleteEmptyFields(pasteboardViewModel);
+        await pasteboardRepository.AddCardToJsonAsync(pasteboardToRepository);
+        var id = pasteboardViewModel.Pasteboard.Id;
+        return RedirectToAction("ShowPasteboard", new {id});
+    }
+    
+    [HttpGet]
+    public IActionResult EditPasteboard(int id)
+    {
+        var pasteboardById = pasteboardRepository.GetPasteboardById(id);
+        var pasteboardViewModel = new PasteboardViewModel
+        {
+            Pasteboard = AddEmptyFields(pasteboardById),
+            AspAction = "EditPasteboard"
+        };
+        return View("CreateEditPasteboard", pasteboardViewModel);
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> EditPasteboard(PasteboardViewModel pasteboardViewModel)
+    {
+        var pasteboard = new Pasteboard();
+            pasteboard = DeleteEmptyFields(pasteboardViewModel);
         await pasteboardRepository.AddCardToJsonAsync(pasteboard);
         var id = pasteboard.Id;
         return RedirectToAction("ShowPasteboard", new{id});
+    }
+    
+    private Pasteboard AddEmptyFields(Pasteboard pasteboard)
+    {
+        var maxFieldCount = 10;
+        var activeFieldCount = pasteboard.PasteboardFields.Count(pf => pf.IsActive);
+        if (activeFieldCount == 0)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                pasteboard.PasteboardFields[i].IsActive = true;
+            }
+        }
+        for (int i = activeFieldCount; i < maxFieldCount; i++)
+        {
+            pasteboard.PasteboardFields.Add(new ActivePasteboardField());
+        }
+        return pasteboard;
+    }
+    private Pasteboard DeleteEmptyFields(PasteboardViewModel pasteboardViewModel)
+    {
+        foreach (var pf in pasteboardViewModel.Pasteboard.PasteboardFields)
+        {
+            if (pf.FieldName != null && pf.FieldValue != null)
+            {
+                pf.IsActive = true;
+            }
+        }
+        var listWithActiveFields = pasteboardViewModel.Pasteboard.PasteboardFields.Where(pf => pf.IsActive).ToList();
+        pasteboardViewModel.Pasteboard.PasteboardFields = listWithActiveFields;
+        return pasteboardViewModel.Pasteboard;
     }
 }
