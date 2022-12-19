@@ -1,32 +1,27 @@
 function addElement()
 {
-    let allShowHideElements = document.getElementsByClassName("show-hide-element");
+    let allShowHideElements = document.querySelectorAll('.show-hide-item')
     for (let i = 0; i < allShowHideElements.length; i++)
     {
         if (allShowHideElements[i].style.display === "block") continue;
         if (allShowHideElements[i].style.display === "none")
         {
-            allShowHideElements[i].style.display = "block";
+            allShowHideElements[i].style.display = "block"
             return;
         }
     }
 }
 
-function deleteElement()
+function deleteElement(id)
 {
-    let allShowHideElements = document.getElementsByClassName("show-hide-element");
-    for (let i = allShowHideElements.length - 1; i > 0; i--)
+    let element = document.getElementById(id.toString());
+    element.style.display = "none";
+    let inputs = element.children;
+    for (let i = 0; i < inputs.length; i++)
     {
-        if (allShowHideElements[i].style.display === "none") continue;
-        if (allShowHideElements[i].style.display === "block")
-        {
-            allShowHideElements[i].style.display = "none";
-            let inputs = allShowHideElements[i].children;
-            for (let j = 0;j < inputs.length;j++ )
-            {
-                inputs[j].value = "";
-            }
-            return;
-        }
+        inputs[i].value = "";
     }
+    let itemListParent = document.querySelector('.show-hide-elements');
+    let itemList = document.querySelectorAll('.show-hide-item');
+    itemListParent.insertBefore(element,null);
 }
