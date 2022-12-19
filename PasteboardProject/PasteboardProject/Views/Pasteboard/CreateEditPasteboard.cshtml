@@ -4,38 +4,39 @@
     Layout = "_Layout";
 }
 
-<h2 class="text-center"> Pasteboard</h2>
+<h2 class="text-center">@Model.AspAction</h2>
 <br/>
-<form asp-action="" asp-controller="Pasteboard" method="post">
+<form asp-action="@Model.AspAction" asp-controller="Pasteboard" method="post">
     <div class="text-center gap-2 col-4 mx-auto">
+        <div>
+            <input asp-for="Pasteboard.Id" type="hidden"/>
+        </div>
         <div>
             <input type="text" class="text-center gap-2 col-4 mx-auto form-control" asp-for="Pasteboard.Name" placeholder="Введите имя или ник"/>
             <span asp-validation-for="Pasteboard.Name" class="text-danger"></span><br/>
         </div>
         <br/>
-        <div>
-
-            @if (@Model.Pasteboard.PasteboardFields != null)
+        <div class="show-hide-elements">
+            @for (int i = 0; i < Model.Pasteboard.PasteboardFields.Count; i++)
             {
-                for (int i = 0; i < @Model.Pasteboard.PasteboardFields.Count; i++)
-                {
-                    <div class="show-hide-element" style="display: block">
-                        <input type="text" class="text-center  mx-auto form-control" asp-for="@Model.Pasteboard.PasteboardFields[i].FieldName))" placeholder="Field Name"/>
-                        <input type="text" class="text-center  mx-auto form-control" asp-for="@Model.Pasteboard.PasteboardFields[i].FieldValue))" placeholder="Field Url"/>
-                         <div>
-                            <a class="btn btn-outline-secondary gap-2 col-3 mx-auto" type="button" onclick="deleteElement()">Удалить</a>
-                         </div>
-                        <br/>
+                var display = Model.Pasteboard.PasteboardFields[i].IsActive ? "display:block" : "display:none";
+                <div id="@i" class="show-hide-item" style=@display>
+                    <input type="text" class="text-center  mx-auto form-control" asp-for="@Model.Pasteboard.PasteboardFields[i].FieldName))" placeholder="Field Name"/>
+                   <span asp-validation-for="Pasteboard.PasteboardFields[i].FieldName" class="text-danger"></span>
+                    <input type="text" class="text-center  mx-auto form-control" asp-for="@Model.Pasteboard.PasteboardFields[i].FieldValue))" placeholder="Field Url"/>
+                    <span asp-validation-for="Pasteboard.PasteboardFields[i].FieldValue" class="text-danger"></span>
+                    <div>
+                        <a class="btn btn-outline-secondary gap-2 col-3 mx-auto" type="button" onclick="deleteElement(@i)">Удалить</a>
                     </div>
-                }
+                </div>
             }
             <br/>
         </div>
-            <div>
-                <a class="btn btn-outline-secondary gap-2 col-3 mx-auto" type="button" onclick="addElement()">Добавить</a>
-            </div>
-            <div>
-                <input class="btn btn-outline-secondary" type="submit"/>
-            </div>
+        <div>
+            <a class="btn btn-outline-secondary gap-2 col-3 mx-auto" type="button" onclick="addElement()">Добавить</a>
         </div>
+        <div>
+            <input class="btn btn-outline-secondary" type="submit"/>
+        </div>
+    </div>
 </form>
