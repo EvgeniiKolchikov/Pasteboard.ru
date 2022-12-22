@@ -71,6 +71,11 @@ public class PasteboardController : Controller
     {
         var maxFieldCount = 10;
         var activeFieldCount = pasteboard.PasteboardFields.Count(pf => pf.IsActive);
+       
+        for (int i = activeFieldCount; i < maxFieldCount; i++)
+        {
+            pasteboard.PasteboardFields.Add(new ActivePasteboardField());
+        }
         if (activeFieldCount == 0)
         {
             for (int i = 0; i < 3; i++)
@@ -78,21 +83,10 @@ public class PasteboardController : Controller
                 pasteboard.PasteboardFields[i].IsActive = true;
             }
         }
-        for (int i = activeFieldCount; i < maxFieldCount; i++)
-        {
-            pasteboard.PasteboardFields.Add(new ActivePasteboardField());
-        }
         return pasteboard;
     }
     private Pasteboard DeleteEmptyFields(PasteboardViewModel pasteboardViewModel)
     {
-        foreach (var pf in pasteboardViewModel.Pasteboard.PasteboardFields)
-        {
-            if (pf.FieldName != null && pf.FieldValue != null)
-            {
-                pf.IsActive = true;
-            }
-        }
         var listWithActiveFields = pasteboardViewModel.Pasteboard.PasteboardFields.Where(pf => pf.IsActive).ToList();
         pasteboardViewModel.Pasteboard.PasteboardFields = listWithActiveFields;
         return pasteboardViewModel.Pasteboard;
