@@ -22,6 +22,10 @@ function deleteElement(id)
         inputs[i].value = "";
     }
     let itemListParent = document.querySelector('.show-hide-elements');
-    let itemList = document.querySelectorAll('.show-hide-item');
     itemListParent.insertBefore(element,null);
+}
+
+function isActiveCheck()
+{
+    
 }
