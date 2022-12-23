@@ -1,10 +1,11 @@
 using System.Text.Json;
 using NLog.Fluent;
+using PasteboardProject.Interfaces;
 using PasteboardProject.Models;
 
 namespace PasteboardProject.Repositories;
 
-public class PasteboardRepositoryJson
+public class PasteboardRepositoryJson : IRepository
 {
     public List<Pasteboard> Pasteboards { get; set; }
     public List<PasteboardField> PasteboardFields { get; set; }
@@ -28,14 +29,12 @@ public class PasteboardRepositoryJson
             var rndIndex = rnd.Next(1, count + 1);
             pasteboard = Pasteboards[rndIndex];
         }
-
         return pasteboard;
     }
 
-    public async Task AddCardToJsonAsync(Pasteboard pasteboard)
+    public async Task AddPasteboardAsync(Pasteboard pasteboard)
     {
         var idExist = Pasteboards.Select(p => p.Id).Any(id => id == pasteboard.Id);
-        
         if (!idExist)
         {
             var lastId = Pasteboards.Count;
@@ -68,6 +67,4 @@ public class PasteboardRepositoryJson
         }
         return list;
     }
-
-    
 }
