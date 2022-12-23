@@ -1,10 +1,16 @@
+using Microsoft.EntityFrameworkCore;
+using PasteboardProject.Context;
+using PasteboardProject.Interfaces;
+using PasteboardProject.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+var connection = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(connection));
+builder.Services.AddTransient<IRepository, PasteboardRepositoryJson>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
-
 
 if (!app.Environment.IsDevelopment())
 {
