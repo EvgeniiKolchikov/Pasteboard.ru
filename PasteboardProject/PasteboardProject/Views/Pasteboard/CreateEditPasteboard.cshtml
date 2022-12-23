@@ -6,7 +6,7 @@
 
 <h2 class="text-center">@Model.AspAction</h2>
 <br/>
-<form asp-action="@Model.AspAction" asp-controller="Pasteboard" method="post" onsubmit="isActiveCheck()">
+<form asp-action="@Model.AspAction" asp-controller="Pasteboard" method="post" onsubmit="isActiveCheck(this)">
     <div class="text-center gap-2 col-4 mx-auto">
         <div>
             <input asp-for="Pasteboard.Id" type="hidden"/>
@@ -17,15 +17,14 @@
         </div>
         <br/>
         <div class="show-hide-elements">
-            @for (int i = 0; i < Model.Pasteboard.PasteboardFields.Count; i++)
+            @for (int i = 0; i < Model.ActivePasteboardFields.Count; i++)
             {
-                var display = Model.Pasteboard.PasteboardFields[i].IsActive ? "display:block" : "display:none";
+                var display = Model.ActivePasteboardFields[i].IsActive ? "display:block" : "display:none";
                 <div id="@i" class="show-hide-item" style=@display>
-                    <input type="text" class="text-center  mx-auto form-control" asp-for="@Model.Pasteboard.PasteboardFields[i].FieldName))" placeholder="Field Name"/>
-                    <span asp-validation-for="Pasteboard.PasteboardFields[i].FieldName" class="text-danger"></span>
-                    <input type="text" class="text-center  mx-auto form-control" asp-for="@Model.Pasteboard.PasteboardFields[i].FieldValue))" placeholder="Field Url"/>
-                    <span asp-validation-for="Pasteboard.PasteboardFields[i].FieldValue" class="text-danger"></span>
-                    <input asp-for="Pasteboard.PasteboardFields[i].IsActive" type="hidden"/>
+                    <input type="text" class="field-name-input text-center  mx-auto form-control" asp-for="@Model.ActivePasteboardFields[i].FieldName))" placeholder="Field Name"/>
+                    <span asp-validation-for="ActivePasteboardFields[i].FieldName" class="text-danger"></span>
+                    <input type="text" class="field-value-input text-center  mx-auto form-control" asp-for="@Model.ActivePasteboardFields[i].FieldValue))" placeholder="Field Url"/>
+                    <span asp-validation-for="ActivePasteboardFields[i].FieldValue" class="text-danger"></span>
                     <div>
                         <a class="btn btn-outline-secondary gap-2 col-3 mx-auto" type="button" onclick="deleteElement(@i)">Удалить</a>
                     </div>
