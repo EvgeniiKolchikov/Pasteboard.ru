@@ -6,7 +6,7 @@
 
 <h2 class="text-center">@Model.AspAction</h2>
 <br/>
-<form asp-action="@Model.AspAction" asp-controller="Pasteboard" method="post" onsubmit="isActiveCheck(this)">
+<form asp-action="@Model.AspAction" asp-controller="Pasteboard" method="post">
     <div class="text-center gap-2 col-4 mx-auto">
         <div>
             <input asp-for="Pasteboard.Id" type="hidden"/>
@@ -21,10 +21,11 @@
             {
                 var display = Model.ActivePasteboardFields[i].IsActive ? "display:block" : "display:none";
                 <div id="@i" class="show-hide-item" style=@display>
-                    <input type="text" class="field-name-input text-center  mx-auto form-control" asp-for="@Model.ActivePasteboardFields[i].FieldName))" placeholder="Field Name"/>
+                    <input id="@(i)fieldname" type="text" class="field-name-input text-center  mx-auto form-control" asp-for="@Model.ActivePasteboardFields[i].FieldName))" placeholder="Field Name"/>
                     <span asp-validation-for="ActivePasteboardFields[i].FieldName" class="text-danger"></span>
-                    <input type="text" class="field-value-input text-center  mx-auto form-control" asp-for="@Model.ActivePasteboardFields[i].FieldValue))" placeholder="Field Url"/>
+                    <input id="@(i)fieldvalue" type="text" class="field-value-input text-center  mx-auto form-control" asp-for="@Model.ActivePasteboardFields[i].FieldValue))" placeholder="Field Url"/>
                     <span asp-validation-for="ActivePasteboardFields[i].FieldValue" class="text-danger"></span>
+                    <input id="@(i)checkbox" type="checkbox" hidden="hidden" value="@Model.ActivePasteboardFields[i].IsActive" asp-for="@Model.ActivePasteboardFields[i].IsActive"> 
                     <div>
                         <a class="btn btn-outline-secondary gap-2 col-3 mx-auto" type="button" onclick="deleteElement(@i)">Удалить</a>
                     </div>
