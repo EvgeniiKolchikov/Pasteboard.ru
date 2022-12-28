@@ -51,7 +51,7 @@ public class PasteboardRepositoryJson : IRepository
         }
     }
 
-    public async Task<List<Pasteboard>> GetAllPasteboardsFromJsonAsync()
+    private async Task<List<Pasteboard>> GetAllPasteboardsFromJsonAsync()
     {
         var list = new List<Pasteboard>();
         try
