@@ -29,5 +29,9 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Pasteboard}/{action=ShowPasteboard}/{id?}");
+app.MapControllerRoute(
+    name: "short",
+    pattern: "{id}",
+    defaults: new { controller = "Pasteboard", action = "ShowPasteboard" });
 
 app.Run();
