@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using PasteboardProject.Context;
 using PasteboardProject.Interfaces;
@@ -14,33 +15,44 @@ public class PasteboardRepositorySql : IRepository
         _db = context;
     }
     
-    public Pasteboard GetPasteboardById(int id)
+    public async Task<Pasteboard> GetPasteboardById(string id)
     {
-         var pasteboard = _db.Pasteboards.FirstAsync(p => p.Id == id).Result;
-         var pasteboardField = _db.PasteboardFields.Where(pf => pf.PasteboardId == id).ToList();
-         pasteboard.PasteboardFields = pasteboardField;
-         return pasteboard;
+        var isInt = int.TryParse(id, out var intId);
+        if (isInt)
+        {
+            var pasteboard = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Id == intId);
+            var pasteboardField = _db.PasteboardFields.Where(pf => pf.PasteboardId == intId).ToList();
+            // Добавить проверку на null
+            pasteboard.PasteboardFields = pasteboardField;
+            return pasteboard;
+        }
+        else
+        {
+            var pasteboard = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Name == id);
+            var pasteboardField = _db.PasteboardFields.Where(pf => pf.PasteboardId == pasteboard.Id).ToList();
+            // Добавить проверку на null
+            pasteboard.PasteboardFields = pasteboardField;
+            return pasteboard;
+        }
     }
 
     public async Task AddPasteboardAsync(Pasteboard pasteboard)
     {
-        var pasteboardExist = await _db.Pasteboards.AnyAsync(p => p.Id == pasteboard.Id);
-        //firstofdefault()
-        if (!pasteboardExist) //id == 0
+        var pasteboardInDataBase = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Id == pasteboard.Id);
+        if (pasteboardInDataBase is null)
         {
             _db.Pasteboards.Add(pasteboard);
             await _db.SaveChangesAsync();
         }
         else
         {
-            var oldFields = _db.PasteboardFields.Where(pf => pf.PasteboardId == pasteboard.Id);
-            foreach (var pf in oldFields)
+            foreach (var pf in pasteboard.PasteboardFields)
             {
-                pf.PasteboardId = null;
+                pf.PasteboardId = pasteboard.Id;
             }
-            _db.PasteboardFields.UpdateRange(oldFields);
-            await _db.SaveChangesAsync();
-            _db.Pasteboards.Update(pasteboard);
+
+            var pasteboardFieldsForRemove = _db.PasteboardFields.Where(pf => pf.PasteboardId == pasteboard.Id);
+            _db.PasteboardFields.RemoveRange(pasteboardFieldsForRemove);
             _db.PasteboardFields.AddRange(pasteboard.PasteboardFields);
             await _db.SaveChangesAsync();
         }
