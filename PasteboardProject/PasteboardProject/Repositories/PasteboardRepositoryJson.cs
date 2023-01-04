@@ -15,21 +15,41 @@ public class PasteboardRepositoryJson : IRepository
         Pasteboards = GetAllPasteboardsFromJsonAsync().Result;
     }
 
-    public Pasteboard GetPasteboardById(int pasteboardId)
+    public Task<Pasteboard> GetPasteboardById(string id)
     {
-        var pasteboard = new Pasteboard();
-        try
+        var isInt = int.TryParse(id, out int intId);
+        if (isInt)
         {
-            pasteboard = Pasteboards[pasteboardId - 1];
+            var pasteboard = new Pasteboard();
+            try
+            {
+                pasteboard = Pasteboards[intId - 1];
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                var count = Pasteboards.Count;
+                var rnd = new Random();
+                var rndIndex = rnd.Next(1, count + 1);
+                pasteboard = Pasteboards[rndIndex];
+            }
+            return Task.FromResult(pasteboard);
         }
-        catch (ArgumentOutOfRangeException)
+        else
         {
-            var count = Pasteboards.Count;
-            var rnd = new Random();
-            var rndIndex = rnd.Next(1, count + 1);
-            pasteboard = Pasteboards[rndIndex];
+            var pasteboard = new Pasteboard();
+            try
+            {
+                pasteboard = Pasteboards.FirstOrDefault(p => p.Name == id);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                var count = Pasteboards.Count;
+                var rnd = new Random();
+                var rndIndex = rnd.Next(1, count + 1);
+                pasteboard = Pasteboards[rndIndex];
+            }
+            return Task.FromResult(pasteboard);
         }
-        return pasteboard;
     }
 
     public async Task AddPasteboardAsync(Pasteboard pasteboard)
