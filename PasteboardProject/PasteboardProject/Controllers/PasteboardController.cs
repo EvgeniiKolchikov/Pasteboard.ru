@@ -14,10 +14,11 @@ public class PasteboardController : Controller
         _repository = repository;
     }
     [HttpGet]
-    public IActionResult ShowPasteboard(int id)
+    public IActionResult ShowPasteboard(string id)
     {
+        
         var pasteboardById = _repository.GetPasteboardById(id);
-        return View(pasteboardById);
+        return View(pasteboardById.Result);
     }
     
     [HttpGet]
@@ -45,9 +46,9 @@ public class PasteboardController : Controller
     }
     
     [HttpGet]
-    public IActionResult EditPasteboard(int id)
+    public IActionResult EditPasteboard(string id)
     {
-        var pasteboardById = _repository.GetPasteboardById(id);
+        var pasteboardById = _repository.GetPasteboardById(id).Result;
         var listActivePasteboardFields = new List<ActivePasteboardField>();
         foreach (var pasteboardField in pasteboardById.PasteboardFields)
         {
