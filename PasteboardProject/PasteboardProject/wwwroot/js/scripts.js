@@ -14,16 +14,6 @@ function addElement()
 
 function deleteElement(id)
 {
-    // let element = document.getElementById(id.toString());
-    // element.style.display = "none";
-    // let inputs = element.children;
-    // for (let i = 0; i < inputs.length; i++)
-    // {
-    //     inputs[i].value = "";
-    // }
-    // let itemListParent = document.querySelector('.show-hide-elements');
-    // itemListParent.insertBefore(element,null);
-
     let element = document.getElementById(id.toString());
     element.style.display = "none";
     document.getElementById(id + "fieldname").value = "";
@@ -31,9 +21,4 @@ function deleteElement(id)
     document.getElementById(id + "checkbox").value = "false";
     let itemListParent = document.querySelector('.show-hide-elements');
     itemListParent.insertBefore(element,null);
-}
-
-function isActiveCheck()
-{
-    
 }
