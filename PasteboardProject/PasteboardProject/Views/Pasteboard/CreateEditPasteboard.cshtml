@@ -2,6 +2,7 @@
 
 @{
     Layout = "_Layout";
+    int addId = 0;
 }
 
 <h2 class="text-center">@Model.AspAction</h2>
@@ -20,12 +21,13 @@
             @for (int i = 0; i < Model.ActivePasteboardFields.Count; i++)
             {
                 var display = Model.ActivePasteboardFields[i].IsActive ? "display:block" : "display:none";
+                if (Model.ActivePasteboardFields[i].IsActive) addId++;
                 <div id="@i" class="show-hide-item" style=@display>
                     <input id="@(i)fieldname" type="text" class="field-name-input text-center  mx-auto form-control" asp-for="@Model.ActivePasteboardFields[i].FieldName))" placeholder="Field Name"/>
                     <span asp-validation-for="ActivePasteboardFields[i].FieldName" class="text-danger"></span>
                     <input id="@(i)fieldvalue" type="text" class="field-value-input text-center  mx-auto form-control" asp-for="@Model.ActivePasteboardFields[i].FieldValue))" placeholder="Field Url"/>
                     <span asp-validation-for="ActivePasteboardFields[i].FieldValue" class="text-danger"></span>
-                    <input id="@(i)checkbox" type="checkbox" hidden="hidden" value="@Model.ActivePasteboardFields[i].IsActive" asp-for="@Model.ActivePasteboardFields[i].IsActive"> 
+                    <input id="@(i)checkbox" type="checkbox" hidden="hidden" value="@Model.ActivePasteboardFields[i].IsActive" asp-for="@Model.ActivePasteboardFields[i].IsActive">
                     <div>
                         <a class="btn btn-outline-secondary gap-2 col-3 mx-auto" type="button" onclick="deleteElement(@i)">Удалить</a>
                     </div>
@@ -34,7 +36,11 @@
             <br/>
         </div>
         <div>
-            <a class="btn btn-outline-secondary gap-2 col-3 mx-auto" type="button" onclick="addElement()">Добавить</a>
+            <button class="btn btn-outline-secondary gap-2 col-3 mx-auto" type="button" onclick="addElement(@addId)">Добавить</button>
+            @* <a class="btn btn-outline-secondary gap-2 col-3 mx-auto" type="button" onclick="addElement(@addId)">Добавить</a> *@
+            @{
+                addId++;
+            }
         </div>
         <div>
             <input class="btn btn-outline-secondary" type="submit"/>
