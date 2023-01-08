@@ -6,8 +6,8 @@ using PasteboardProject.Repositories;
 var builder = WebApplication.CreateBuilder(args);
 
 var connection = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(connection));
-builder.Services.AddTransient<IRepository, PasteboardRepositorySql>();
+builder.Services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(connection).UseLowerCaseNamingConvention());
+builder.Services.AddTransient<IRepository, PasteboardRepositoryPostgres>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
