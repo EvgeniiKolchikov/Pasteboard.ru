@@ -15,7 +15,7 @@ public class PasteboardRepositoryJson : IRepository
         Pasteboards = GetAllPasteboardsFromJsonAsync().Result;
     }
 
-    public Task<Pasteboard> GetPasteboardById(string id)
+    public Task<Pasteboard> GetPasteboardByIdAsync(string id)
     {
         var isInt = int.TryParse(id, out int intId);
         if (isInt)
