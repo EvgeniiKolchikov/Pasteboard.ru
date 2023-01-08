@@ -1,6 +1,7 @@
 using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using PasteboardProject.Context;
+using PasteboardProject.Exceptions;
 using PasteboardProject.Interfaces;
 using PasteboardProject.Models;
 
@@ -13,21 +14,20 @@ public class PasteboardRepositorySql : IRepository
     {
         _db = context;
     }
-    public async Task<Pasteboard> GetPasteboardById(string id)
+    public async Task<Pasteboard> GetPasteboardByIdAsync(string id)
     {
         var isInt = int.TryParse(id, out var intId);
         if (isInt)
         {
             var pasteboard = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Id == intId);
-            var pasteboardField = _db.PasteboardFields.Where(pf => pf.PasteboardId == intId).ToList();
-            if (pasteboard is null) return new Pasteboard();
-            pasteboard.PasteboardFields = pasteboardField;
+            if (pasteboard is null) throw new CustomException(CustomException.NotFoundMessage);
+            pasteboard.PasteboardFields = _db.PasteboardFields.Where(pf => pf.PasteboardId == intId).ToList();
             return pasteboard;
         }
         else
         {
             var pasteboard = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Name == id);
-            if (pasteboard is null) return new Pasteboard();
+            if (pasteboard is null) throw new CustomException(CustomException.NotFoundMessage);
             pasteboard.PasteboardFields = _db.PasteboardFields.Where(pf => pf.PasteboardId == pasteboard.Id).ToList();
             return pasteboard;
         }
