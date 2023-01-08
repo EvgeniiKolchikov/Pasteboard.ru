@@ -1,12 +1,14 @@
 function addElement()
 {
-    let allShowHideElements = document.querySelectorAll('.show-hide-item')
-    for (let i = 0; i < allShowHideElements.length; i++)
+    let showHideElements = document.querySelectorAll('.show-hide-item')
+    for (let i = 0; i < showHideElements.length; i++)
     {
-        if (allShowHideElements[i].style.display === "block") continue;
-        if (allShowHideElements[i].style.display === "none")
+        if (showHideElements[i].style.display === "none")
         {
-            allShowHideElements[i].style.display = "block"
+            showHideElements[i].style.display = "block";
+            let element = document.getElementById(showHideElements[i].id + "checkbox");
+            element.value = "true";
+            element.checked = 1;
             return;
         }
     }
