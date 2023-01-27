@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using NLog.Fluent;
 using PasteboardProject.Context;
 using PasteboardProject.Interfaces;
 using PasteboardProject.Repositories;
@@ -25,6 +27,15 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.Use(async (context, next) =>
+{
+    var stopWatch = new Stopwatch();
+    stopWatch.Start();
+    await next.Invoke();
+    stopWatch.Stop();
+    app.Logger.LogInformation($"Время запроса: {stopWatch.ElapsedMilliseconds}");
+});
 
 app.MapControllerRoute(
     name: "default",
