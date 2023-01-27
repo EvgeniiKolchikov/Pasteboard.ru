@@ -43,6 +43,8 @@ public class PasteboardRepositoryPostgres : IRepository
         }
         else
         {
+            pasteboardInDataBase.Name = pasteboard.Name;
+            _db.Pasteboards.Update(pasteboardInDataBase);
             foreach (var pf in pasteboard.PasteboardFields)
             {
                 pf.PasteboardId = pasteboard.Id;
