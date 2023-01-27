@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using NLog.Fluent;
 using PasteboardProject.Context;
 using PasteboardProject.Interfaces;
+using PasteboardProject.Middlewares;
 using PasteboardProject.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,11 +17,12 @@ var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {
-    app.UseHttpsRedirection();
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
@@ -28,14 +30,7 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.Use(async (context, next) =>
-{
-    var stopWatch = new Stopwatch();
-    stopWatch.Start();
-    await next.Invoke();
-    stopWatch.Stop();
-    app.Logger.LogInformation($"Время запроса: {stopWatch.ElapsedMilliseconds}");
-});
+app.UseMiddleware<ResponseTimeMiddleware>();
 
 app.MapControllerRoute(
     name: "default",
