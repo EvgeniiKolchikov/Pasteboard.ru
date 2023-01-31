@@ -15,6 +15,8 @@ public class PasteboardController : Controller
         _repository = repository;
     }
     [HttpGet]
+    [Route("{id}")]
+    [Route("pasteboard/{id}")]
     public async Task<IActionResult> ShowPasteboard(string id)
     {
         try
@@ -33,6 +35,7 @@ public class PasteboardController : Controller
     }
     
     [HttpGet]
+    [Route("pasteboard/create")]
     public IActionResult CreatePasteboard()
     {
         var pasteboard = new Pasteboard();
@@ -47,6 +50,7 @@ public class PasteboardController : Controller
     }
     
     [HttpPost]
+    [Route("pasteboard/create")]
     public async Task<IActionResult> CreatePasteboard(PasteboardViewModel pasteboardViewModel)
     {
         var pasteboard = DeleteEmptyFields(pasteboardViewModel);
@@ -56,6 +60,7 @@ public class PasteboardController : Controller
     }
     
     [HttpGet]
+    [Route("pasteboard/edit/{id}")]
     public IActionResult EditPasteboard(string id)
     {
         try
@@ -88,6 +93,7 @@ public class PasteboardController : Controller
     }
     
     [HttpPost]
+    [Route("pasteboard/edit/{id}")]
     public async Task<IActionResult> EditPasteboard(PasteboardViewModel pasteboardViewModel)
     {
         var pasteboard = DeleteEmptyFields(pasteboardViewModel);
