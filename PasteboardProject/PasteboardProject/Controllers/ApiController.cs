@@ -5,6 +5,7 @@ using PasteboardProject.Models;
 
 namespace PasteboardProject.api;
 
+[Route("[controller]")]
 public class ApiController : Controller
 {
     private IRepository _repository;
@@ -15,6 +16,8 @@ public class ApiController : Controller
     }
 
     [HttpGet]
+    [Route("{id}")]
+    [Route("pasteboard/{id}")]
     public async Task GetPasteboardById(string id)
     {
         try
@@ -33,6 +36,7 @@ public class ApiController : Controller
     }
     
     [HttpPost]
+    [Route("pasteboard/create")]
     public async Task CreatePasteboard([FromBody]Pasteboard pasteboard)
     {
         try
@@ -48,6 +52,7 @@ public class ApiController : Controller
     }
 
     [HttpPost]
+    [Route("pasteboard/edit/{id}")]
     public async Task EditPasteboard([FromBody]Pasteboard pasteboard)
     {
         try
