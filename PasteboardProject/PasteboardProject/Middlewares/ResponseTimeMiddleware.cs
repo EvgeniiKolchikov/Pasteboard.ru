@@ -7,18 +7,19 @@ namespace PasteboardProject.Middlewares;
 public class ResponseTimeMiddleware
 {
     private readonly RequestDelegate _next;
-
+    private Stopwatch _stopwatch;
     public ResponseTimeMiddleware(RequestDelegate next)
     {
         _next = next;
+        _stopwatch = new Stopwatch();
     }
 
     public async Task InvokeAsync(HttpContext context)
     {
-        var stopwatch = new Stopwatch();
-        stopwatch.Start();
+        _stopwatch.Start();
         await _next.Invoke(context);
-        stopwatch.Stop();
-        Console.WriteLine($"Время запроса: {stopwatch.ElapsedMilliseconds}");
+        _stopwatch.Stop();
+        Console.WriteLine($"Время запроса: {_stopwatch.ElapsedMilliseconds}");
+        _stopwatch.Reset();
     }
 }
