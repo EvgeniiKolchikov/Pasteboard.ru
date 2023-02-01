@@ -8,10 +8,21 @@ using PasteboardProject.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connection = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(connection).UseLowerCaseNamingConvention());
-builder.Services.AddTransient<IRepository, PasteboardRepositoryPostgres>();
+var config = builder.Configuration;
+var connectionPostgres = builder.Configuration.GetConnectionString("PostgresConnection");
+var connectionMsSql = builder.Configuration.GetConnectionString("SqlConnection");
+// builder.Services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(connectionMsSql));
+// builder.Services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(connectionPostgres).UseLowerCaseNamingConvention());
+//  builder.Services.AddTransient(typeof(IRepository),typeof(PasteboardRepositoryPostgres));
+//  builder.Services.AddTransient(typeof(IRepository),typeof(PasteboardRepositorySql));
+//  builder.Services.AddTransient(typeof(IRepository),typeof(PasteboardRepositoryJson));
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<ContextFactory>();
+builder.Services.AddScoped<PasteboardRepositoryPostgres>()
+    .AddScoped<IRepository, PasteboardRepositoryPostgres>(r => r.GetService<PasteboardRepositoryPostgres>());
+ builder.Services.AddScoped<PasteboardRepositoryJson>()
+     .AddScoped<IRepository, PasteboardRepositoryJson>(r => r.GetService<PasteboardRepositoryJson>());
+
 
 var app = builder.Build();
 
