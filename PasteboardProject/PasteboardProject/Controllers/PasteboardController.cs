@@ -7,6 +7,7 @@ using PasteboardProject.Repositories;
 
 namespace PasteboardProject.Controllers;
 
+[Route("[controller]")]
 public class PasteboardController : Controller
 {
     private IRepository _repository;
@@ -16,7 +17,6 @@ public class PasteboardController : Controller
     }
     [HttpGet]
     [Route("{id}")]
-    [Route("pasteboard/{id}")]
     public async Task<IActionResult> ShowPasteboard(string id)
     {
         try
@@ -35,7 +35,7 @@ public class PasteboardController : Controller
     }
     
     [HttpGet]
-    [Route("pasteboard/create")]
+    [Route("create")]
     public IActionResult CreatePasteboard()
     {
         var pasteboard = new Pasteboard();
@@ -50,7 +50,7 @@ public class PasteboardController : Controller
     }
     
     [HttpPost]
-    [Route("pasteboard/create")]
+    [Route("create")]
     public async Task<IActionResult> CreatePasteboard(PasteboardViewModel pasteboardViewModel)
     {
         var pasteboard = DeleteEmptyFields(pasteboardViewModel);
@@ -60,7 +60,7 @@ public class PasteboardController : Controller
     }
     
     [HttpGet]
-    [Route("pasteboard/edit/{id}")]
+    [Route("edit/{id}")]
     public IActionResult EditPasteboard(string id)
     {
         try
@@ -93,7 +93,7 @@ public class PasteboardController : Controller
     }
     
     [HttpPost]
-    [Route("pasteboard/edit/{id}")]
+    [Route("edit/{id}")]
     public async Task<IActionResult> EditPasteboard(PasteboardViewModel pasteboardViewModel)
     {
         var pasteboard = DeleteEmptyFields(pasteboardViewModel);
