@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using NLog;
 using PasteboardProject.Exceptions;
 using PasteboardProject.Interfaces;
 using PasteboardProject.Models;
@@ -10,10 +11,12 @@ namespace PasteboardProject.Controllers;
 [Route("[controller]")]
 public class PasteboardController : Controller
 {
-    private IRepository _repository;
+    private readonly IRepository _repository;
+    private static readonly Logger Logger = LogManager.GetLogger("PasteboardController");
     public PasteboardController(IRepository repository)
     {
         _repository = repository;
+        Logger.Debug("Logger Init");
     }
     [HttpGet]
     [Route("{id}")]
@@ -22,14 +25,17 @@ public class PasteboardController : Controller
         try
         {
             var pasteboardById = await _repository.GetPasteboardByIdAsync(id);
+            Logger.Debug($"This is Show Pasteboard Action: Id {id}, pasteboard name: {pasteboardById.Name}");
             return View(pasteboardById);
         }
         catch (CustomException e)
         {
+            Logger.Error($"CustomException: {e.Message}");
             return NotFound(e.Message);
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            Logger.Error($"Exception: {e.Message}");
             return NotFound(CustomException.DefaultMessage); // to ErrorView
         }
     }
@@ -38,6 +44,7 @@ public class PasteboardController : Controller
     [Route("create")]
     public IActionResult CreatePasteboard()
     {
+        Logger.Debug($"This is CreatePasteboard Action: Get");
         var pasteboard = new Pasteboard();
         var activePasteboardFields = new List<ActivePasteboardField>();
         var pasteboardViewModel = new PasteboardViewModel()
@@ -53,8 +60,9 @@ public class PasteboardController : Controller
     [Route("create")]
     public async Task<IActionResult> CreatePasteboard(PasteboardViewModel pasteboardViewModel)
     {
+        Logger.Debug($"This is CreatePasteboard Action: Post");
         var pasteboard = DeleteEmptyFields(pasteboardViewModel);
-        await _repository.AddPasteboardAsync(pasteboard);
+        await _repository.SendPasteboardToDataBaseAsync(pasteboard);
         var id = pasteboardViewModel.Pasteboard.Id;
         return RedirectToAction("ShowPasteboard", new {id});
     }
@@ -63,6 +71,7 @@ public class PasteboardController : Controller
     [Route("edit/{id}")]
     public IActionResult EditPasteboard(string id)
     {
+        Logger.Debug($"This is EditPasteboard Action: Get");
         try
         {
             var pasteboardById = _repository.GetPasteboardByIdAsync(id).Result;
@@ -84,11 +93,13 @@ public class PasteboardController : Controller
         }
         catch (CustomException e)
         {
+            Logger.Error($"CustomException: {e.Message}");
             return NotFound(e.Message);
         }
         catch (Exception)
         {
-            return NotFound(CustomException.DefaultMessage);
+            Logger.Error($"Exception: {CustomException.DefaultMessage}");
+            return NotFound(CustomException.DefaultMessage); // to ErrorView
         }
     }
     
@@ -96,8 +107,9 @@ public class PasteboardController : Controller
     [Route("edit/{id}")]
     public async Task<IActionResult> EditPasteboard(PasteboardViewModel pasteboardViewModel)
     {
+        Logger.Debug($"This is EditPasteboard Action: Post");
         var pasteboard = DeleteEmptyFields(pasteboardViewModel);
-        await _repository.AddPasteboardAsync(pasteboard);
+        await _repository.SendPasteboardToDataBaseAsync(pasteboard);
         var id = pasteboard.Id;
         return RedirectToAction("ShowPasteboard", new{id});
     }
