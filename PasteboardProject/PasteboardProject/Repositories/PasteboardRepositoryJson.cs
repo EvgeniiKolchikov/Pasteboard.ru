@@ -52,7 +52,7 @@ public class PasteboardRepositoryJson : IRepository
         }
     }
 
-    public async Task AddPasteboardAsync(Pasteboard pasteboard)
+    public async Task SendPasteboardToDataBaseAsync(Pasteboard pasteboard)
     {
         var idExist = Pasteboards.Select(p => p.Id).Any(id => id == pasteboard.Id);
         if (!idExist)

@@ -33,7 +33,7 @@ public class PasteboardRepositorySql : IRepository
         }
     }
 
-    public async Task AddPasteboardAsync(Pasteboard pasteboard)
+    public async Task SendPasteboardToDataBaseAsync(Pasteboard pasteboard)
     {
         var pasteboardInDataBase = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Id == pasteboard.Id);
         if (pasteboardInDataBase is null)

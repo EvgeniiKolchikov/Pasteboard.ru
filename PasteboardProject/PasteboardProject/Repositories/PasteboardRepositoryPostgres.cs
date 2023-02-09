@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using NLog;
 using PasteboardProject.Context;
 using PasteboardProject.Exceptions;
 using PasteboardProject.Interfaces;
@@ -8,51 +9,74 @@ namespace PasteboardProject.Repositories;
 
 public class PasteboardRepositoryPostgres : IRepository
 {
-    private ApplicationContext _db;
-
+    private readonly ApplicationContext _db;
+    private static readonly Logger Logger = LogManager.GetLogger("PasteboardRepositoryPostgres");
     public PasteboardRepositoryPostgres(ApplicationContext context)
     {
         _db = context;
+        Logger.Debug("PostgresRepository Init");
     }
     public async Task<Pasteboard> GetPasteboardByIdAsync(string id)
     {
+        Logger.Debug("Method GetPasteboardByIdAsync");
         var isInt = int.TryParse(id, out var intId);
         if (isInt)
         {
             var pasteboard = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Id == intId);
-            if (pasteboard is null) throw new CustomException(CustomException.NotFoundMessage);
+            if (pasteboard is null)
+            {
+                Logger.Error($"{CustomException.NotFoundMessage}");
+                throw new CustomException(CustomException.NotFoundMessage);
+            }
             pasteboard.PasteboardFields = _db.PasteboardFields.Where(pf => pf.PasteboardId == intId).ToList();
             return pasteboard;
         }
         else
         {
             var pasteboard = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Name == id);
-            if (pasteboard is null) throw new CustomException(CustomException.NotFoundMessage);
+            if (pasteboard is null)
+            {
+                Logger.Error($"{CustomException.NotFoundMessage}");
+                throw new CustomException(CustomException.NotFoundMessage);
+            }
             pasteboard.PasteboardFields = _db.PasteboardFields.Where(pf => pf.PasteboardId == pasteboard.Id).ToList();
             return pasteboard;
         }
     }
 
-    public async Task AddPasteboardAsync(Pasteboard pasteboard)
+    public async Task SendPasteboardToDataBaseAsync(Pasteboard pasteboard)
     {
+        Logger.Debug("Method SendPasteboardToDataBaseAsync");
         var pasteboardInDataBase = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Id == pasteboard.Id);
         if (pasteboardInDataBase is null)
         {
-            _db.Pasteboards.Add(pasteboard);
-            await _db.SaveChangesAsync();
+            await AddToDataBaseAsync(pasteboard);
         }
         else
         {
-            pasteboardInDataBase.Name = pasteboard.Name;
-            _db.Pasteboards.Update(pasteboardInDataBase);
-            foreach (var pf in pasteboard.PasteboardFields)
-            {
-                pf.PasteboardId = pasteboard.Id;
-            }
-            var pasteboardFieldsForRemove = _db.PasteboardFields.Where(pf => pf.PasteboardId == pasteboard.Id);
-            _db.PasteboardFields.RemoveRange(pasteboardFieldsForRemove);
-            _db.PasteboardFields.AddRange(pasteboard.PasteboardFields);
-            await _db.SaveChangesAsync();
+            await EditPasteboardInDataBase(pasteboardInDataBase, pasteboard);
         }
+    }
+
+    private async Task AddToDataBaseAsync(Pasteboard pasteboard)
+    {
+        Logger.Debug("Create New Pasteboard");
+        _db.Pasteboards.Add(pasteboard);
+        await _db.SaveChangesAsync();
+    }
+
+    private async Task EditPasteboardInDataBase(Pasteboard pasteboardInDataBase, Pasteboard pasteboardForEdit)
+    {
+        Logger.Debug($"Edit Pasteboard {pasteboardInDataBase.Name}");
+        pasteboardInDataBase.Name = pasteboardForEdit.Name;
+        _db.Pasteboards.Update(pasteboardInDataBase);
+        foreach (var pf in pasteboardForEdit.PasteboardFields)
+        {
+            pf.PasteboardId = pasteboardForEdit.Id;
+        }
+        var pasteboardFieldsForRemove = _db.PasteboardFields.Where(pf => pf.PasteboardId == pasteboardForEdit.Id);
+        _db.PasteboardFields.RemoveRange(pasteboardFieldsForRemove);
+        _db.PasteboardFields.AddRange(pasteboardForEdit.PasteboardFields);
+        await _db.SaveChangesAsync();
     }
 }
