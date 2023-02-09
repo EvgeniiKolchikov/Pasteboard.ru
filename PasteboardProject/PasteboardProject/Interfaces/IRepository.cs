@@ -5,6 +5,6 @@ namespace PasteboardProject.Interfaces;
 public interface IRepository
 {
     Task<Pasteboard> GetPasteboardByIdAsync(string id);
-    Task AddPasteboardAsync(Pasteboard pasteboard);
+    Task SendPasteboardToDataBaseAsync(Pasteboard pasteboard);
 
 }
