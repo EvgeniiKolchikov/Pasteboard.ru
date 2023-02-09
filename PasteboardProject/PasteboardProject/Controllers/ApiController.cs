@@ -8,7 +8,7 @@ namespace PasteboardProject.api;
 [Route("[controller]")]
 public class ApiController : Controller
 {
-    private IRepository _repository;
+    private readonly IRepository _repository;
 
     public ApiController(IRepository repository)
     {
@@ -41,7 +41,7 @@ public class ApiController : Controller
     {
         try
         {
-            await _repository.AddPasteboardAsync(pasteboard);
+            await _repository.SendPasteboardToDataBaseAsync(pasteboard);
             await HttpContext.Response.WriteAsJsonAsync(pasteboard);
         }
         catch (Exception)
@@ -57,7 +57,7 @@ public class ApiController : Controller
     {
         try
         {
-            await _repository.AddPasteboardAsync(pasteboard);
+            await _repository.SendPasteboardToDataBaseAsync(pasteboard);
             await HttpContext.Response.WriteAsJsonAsync(pasteboard);
         }
         catch (CustomException e)
