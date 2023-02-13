@@ -17,6 +17,8 @@ try
         options.UseNpgsql(connection).UseLowerCaseNamingConvention());
     builder.Services.AddTransient<IRepository, PasteboardRepositoryPostgres>();
     builder.Services.AddControllersWithViews();
+    builder.Services.AddAuthentication("Bearer").AddJwtBearer();
+    builder.Services.AddAuthorization();
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
 
@@ -35,6 +37,7 @@ try
 
     app.UseRouting();
 
+    app.UseAuthorization();
     app.UseAuthorization();
 
     app.UseMiddleware<ResponseTimeMiddleware>();
