@@ -22,27 +22,6 @@ try
         options.UseNpgsql(connection).UseLowerCaseNamingConvention());
     builder.Services.AddTransient<IRepository, PasteboardRepositoryPostgres>();
     builder.Services.AddControllersWithViews();
-    builder.Services.AddAuthorization();
-    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            // указывает, будет ли валидироваться издатель при валидации токена
-            ValidateIssuer = true,
-            // строка, представляющая издателя
-            ValidIssuer = "MyAuthServer",
-            // будет ли валидироваться потребитель токена
-            ValidateAudience = true,
-            // установка потребителя токена
-            ValidAudience = "MyAuthClient",
-            // будет ли валидироваться время существования
-            ValidateLifetime = true,
-            // установка ключа безопасности
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("mysupersecret_secretkey!123")),
-            // валидация ключа безопасности
-            ValidateIssuerSigningKey = true,
-        };
-    });
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
 
@@ -60,10 +39,7 @@ try
     app.UseStaticFiles();
 
     app.UseRouting();
-
-    app.UseAuthorization();
-    app.UseAuthorization();
-
+    
     app.UseMiddleware<ResponseTimeMiddleware>();
 
     app.MapControllers();
