@@ -10,11 +10,11 @@ namespace PasteboardProject.api;
 [Route("[controller]")]
 public class ApiController : Controller
 {
-    private readonly IRepository _repository;
+    private readonly IPasteboardRepository _pasteboardRepository;
     private static readonly Logger Logger = LogManager.GetLogger("ApiController");
-    public ApiController(IRepository repository)
+    public ApiController(IPasteboardRepository pasteboardRepository)
     {
-        _repository = repository;
+        _pasteboardRepository = pasteboardRepository;
     }
 
     [HttpGet]
@@ -25,7 +25,7 @@ public class ApiController : Controller
         Logger.Debug($"Getpasteboard{id} Action");
         try
         {
-            var pasteboardById = await _repository.GetPasteboardByIdAsync(id);
+            var pasteboardById = await _pasteboardRepository.GetPasteboardByIdAsync(id);
             await HttpContext.Response.WriteAsJsonAsync(pasteboardById);
         }
         catch (CustomException e)
@@ -47,7 +47,7 @@ public class ApiController : Controller
         Logger.Debug("CreatePasteboard Action");
         try
         {
-            await _repository.SendPasteboardToDataBaseAsync(pasteboard);
+            await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard);
             await HttpContext.Response.WriteAsJsonAsync(pasteboard);
         }
         catch (Exception e)
@@ -65,7 +65,7 @@ public class ApiController : Controller
         Logger.Debug("EditPasteboard Action");
         try
         {
-            await _repository.SendPasteboardToDataBaseAsync(pasteboard);
+            await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard);
             await HttpContext.Response.WriteAsJsonAsync(pasteboard);
         }
         catch (CustomException e)

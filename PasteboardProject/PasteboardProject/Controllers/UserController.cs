@@ -1,45 +1,36 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using NLog;
+using PasteboardProject.Interfaces;
+using PasteboardProject.Models;
 
 namespace PasteboardProject.Controllers;
 
 [Route("[controller]")]
 public class UserController : Controller
 {
-    [HttpGet]
-    [Route("{username}")]
-    public string MyToken(string username)
+    private readonly IUserRepository _userRepository;
+    private static readonly Logger Logger = LogManager.GetLogger("UserController");
+    public UserController(IUserRepository userRepository)
     {
-        var claims = new List<Claim> {new Claim(ClaimTypes.Name, username) };
-        var jwt = new JwtSecurityToken(
-            issuer: AuthOptions.ISSUER,
-            audience: AuthOptions.AUDIENCE,
-            claims: claims,
-            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(60)), // время действия 2 минуты
-            signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
-            
-        return new JwtSecurityTokenHandler().WriteToken(jwt);
+        _userRepository = userRepository;
+        Logger.Debug("User Controller in");
     }
 
-    [HttpGet]
-    [Authorize]
-    [Route("access/a")]
-    public string Access()
+    [HttpGet("create")]
+    public IActionResult CreateUser()
     {
-        return "Success";
+        return View();
     }
 
-}
-
-public class AuthOptions
-{
-    public const string ISSUER = "MyAuthServer"; // издатель токена
-    public const string AUDIENCE = "MyAuthClient"; // потребитель токена
-    const string KEY = "mysupersecret_secretkey!123";   // ключ для шифрации
-    public static SymmetricSecurityKey GetSymmetricSecurityKey() => 
-        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(KEY));
+    [HttpPost("create")]
+    public async Task<IActionResult> CreatePasteboard(User user)
+    {
+        
+    }
 }

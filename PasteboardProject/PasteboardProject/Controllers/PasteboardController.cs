@@ -12,11 +12,11 @@ namespace PasteboardProject.Controllers;
 [Route("[controller]")]
 public class PasteboardController : Controller
 {
-    private readonly IRepository _repository;
+    private readonly IPasteboardRepository _pasteboardRepository;
     private static readonly Logger Logger = LogManager.GetLogger("PasteboardController");
-    public PasteboardController(IRepository repository)
+    public PasteboardController(IPasteboardRepository pasteboardRepository)
     {
-        _repository = repository;
+        _pasteboardRepository = pasteboardRepository;
         Logger.Debug("Logger Init");
     }
     [HttpGet]
@@ -25,7 +25,7 @@ public class PasteboardController : Controller
     {
         try
         {
-            var pasteboardById = await _repository.GetPasteboardByIdAsync(id);
+            var pasteboardById = await _pasteboardRepository.GetPasteboardByIdAsync(id);
             Logger.Debug($"This is Show Pasteboard Action: Id {id}, pasteboard name: {pasteboardById.Name}");
             return View(pasteboardById);
         }
@@ -63,7 +63,7 @@ public class PasteboardController : Controller
     {
         Logger.Debug($"This is CreatePasteboard Action: Post");
         var pasteboard = DeleteEmptyFields(pasteboardViewModel);
-        await _repository.SendPasteboardToDataBaseAsync(pasteboard);
+        await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard);
         var id = pasteboardViewModel.Pasteboard.Id;
         return RedirectToAction("ShowPasteboard", new {id});
     }
@@ -75,7 +75,7 @@ public class PasteboardController : Controller
         Logger.Debug($"This is EditPasteboard Action: Get");
         try
         {
-            var pasteboardById = _repository.GetPasteboardByIdAsync(id).Result;
+            var pasteboardById = _pasteboardRepository.GetPasteboardByIdAsync(id).Result;
             var listActivePasteboardFields = new List<ActivePasteboardField>();
             foreach (var pasteboardField in pasteboardById.PasteboardFields)
             {
@@ -110,7 +110,7 @@ public class PasteboardController : Controller
     {
         Logger.Debug($"This is EditPasteboard Action: Post");
         var pasteboard = DeleteEmptyFields(pasteboardViewModel);
-        await _repository.SendPasteboardToDataBaseAsync(pasteboard);
+        await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard);
         var id = pasteboard.Id;
         return RedirectToAction("ShowPasteboard", new{id});
     }

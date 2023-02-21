@@ -5,7 +5,7 @@ using PasteboardProject.Models;
 
 namespace PasteboardProject.Repositories;
 
-public class PasteboardRepositoryJson : IRepository
+public class PasteboardRepositoryJson : IPasteboardRepository
 {
     public List<Pasteboard> Pasteboards { get; set; }
     public List<PasteboardField> PasteboardFields { get; set; }

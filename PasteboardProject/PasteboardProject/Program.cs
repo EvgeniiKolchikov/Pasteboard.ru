@@ -20,7 +20,8 @@ try
     var connection = builder.Configuration.GetConnectionString("PostgresConnection");
     builder.Services.AddDbContext<ApplicationContext>(options =>
         options.UseNpgsql(connection).UseLowerCaseNamingConvention());
-    builder.Services.AddTransient<IRepository, PasteboardRepositoryPostgres>();
+    builder.Services.AddTransient<IPasteboardRepository, PasteboardRepositoryPostgres>();
+    builder.Services.AddTransient<IUserRepository, UserRepository>();
     builder.Services.AddControllersWithViews();
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();

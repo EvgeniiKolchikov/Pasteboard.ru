@@ -7,7 +7,7 @@ using PasteboardProject.Models;
 
 namespace PasteboardProject.Repositories;
 
-public class PasteboardRepositoryPostgres : IRepository
+public class PasteboardRepositoryPostgres : IPasteboardRepository
 {
     private readonly ApplicationContext _db;
     private static readonly Logger Logger = LogManager.GetLogger("PasteboardRepositoryPostgres");

@@ -7,7 +7,7 @@ using PasteboardProject.Models;
 
 namespace PasteboardProject.Repositories;
 
-public class PasteboardRepositorySql : IRepository
+public class PasteboardRepositorySql : IPasteboardRepository
 {
     private ApplicationContext _db;
     public PasteboardRepositorySql(ApplicationContext context)

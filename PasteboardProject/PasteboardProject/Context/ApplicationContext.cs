@@ -7,6 +7,7 @@ public class ApplicationContext : DbContext
 {
     public DbSet<Pasteboard> Pasteboards { get; set; }
     public DbSet<PasteboardField> PasteboardFields { get; set; }
+    public DbSet<User> Users { get; set; }
 
     public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
     {
