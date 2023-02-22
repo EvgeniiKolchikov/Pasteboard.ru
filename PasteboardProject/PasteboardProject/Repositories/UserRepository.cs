@@ -29,6 +29,17 @@ public class UserRepository : IUserRepository
         return user;
     }
 
+    public async Task<bool> HasUserInDataBase(User user)
+    {
+        return await _db.Users.AnyAsync(u => u.Name == user.Name);
+    }
+
+    public async Task AddUserToDataBase(User user)
+    {
+        await _db.Users.AddAsync(user);
+        await _db.SaveChangesAsync();
+    }
+
     private string GetHashPassword(string password)
     {
         //hash logic

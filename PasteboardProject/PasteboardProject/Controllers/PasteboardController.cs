@@ -9,6 +9,7 @@ using PasteboardProject.Repositories;
 
 namespace PasteboardProject.Controllers;
 
+[Authorize]
 [Route("[controller]")]
 public class PasteboardController : Controller
 {
@@ -19,6 +20,8 @@ public class PasteboardController : Controller
         _pasteboardRepository = pasteboardRepository;
         Logger.Debug("Logger Init");
     }
+    
+    [AllowAnonymous]
     [HttpGet]
     [Route("{id}")]
     public async Task<IActionResult> ShowPasteboard(string id)

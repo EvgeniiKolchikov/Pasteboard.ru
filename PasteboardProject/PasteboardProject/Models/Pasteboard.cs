@@ -9,6 +9,5 @@ public class Pasteboard
     [StringLength(50, ErrorMessage = "Длина строки должна быть до 50 символов")]
     public string Name { get; set; }
     public List<PasteboardField>? PasteboardFields { get; set; }
-    public int UserId { get; set; }
-    
+
 }

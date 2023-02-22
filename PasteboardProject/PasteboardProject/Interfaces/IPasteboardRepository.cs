@@ -6,5 +6,5 @@ public interface IPasteboardRepository
 {
     Task<Pasteboard> GetPasteboardByIdAsync(string id);
     Task SendPasteboardToDataBaseAsync(Pasteboard pasteboard);
-
+    
 }
