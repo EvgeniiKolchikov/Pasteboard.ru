@@ -1,8 +1,20 @@
-@model dynamic
+@model PasteboardProject.Models.User;
 
 @{
-    ViewBag.Title = "title";
     Layout = "_Layout";
 }
 
-<h2>User Page</h2>
+
+
+<h2 class="text-center">@Model.Name</h2>
+<br/>
+<body class="text-center">
+    @foreach (var pf in Model.Pasteboards)
+    {
+        <div  class="btn btn-lg bd-btn-lg btn-outline-secondary gap-2 col-4 mx-auto"
+           onclick="('send', 'event', 'Examples', 'Hero', 'Download');">
+            @pf.Name
+        </div><br/>
+    }
+</body>
+

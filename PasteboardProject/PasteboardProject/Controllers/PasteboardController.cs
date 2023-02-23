@@ -66,6 +66,7 @@ public class PasteboardController : Controller
     {
         Logger.Debug($"This is CreatePasteboard Action: Post");
         var pasteboard = DeleteEmptyFields(pasteboardViewModel);
+        var user = HttpContext.User.Identity;
         await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard);
         var id = pasteboardViewModel.Pasteboard.Id;
         return RedirectToAction("ShowPasteboard", new {id});

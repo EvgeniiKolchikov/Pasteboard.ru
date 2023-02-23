@@ -59,7 +59,7 @@ public class PasteboardRepositoryPostgres : IPasteboardRepository
     private async Task AddToDataBaseAsync(Pasteboard pasteboard)
     {
         Logger.Debug("Create New Pasteboard");
-        _db.Pasteboards.Add(pasteboard);
+        await _db.Pasteboards.AddAsync(pasteboard);
         await _db.SaveChangesAsync();
     }
 

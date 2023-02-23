@@ -13,7 +13,7 @@ using PasteboardProject.Models.ViewModels;
 
 namespace PasteboardProject.Controllers;
 
-[Authorize]
+
 [Route("[controller]")]
 public class UserController : Controller
 {
@@ -26,21 +26,13 @@ public class UserController : Controller
         _configuration = configuration;
         Logger.Debug("User Controller in");
     }
-
-    [AllowAnonymous]
+    
     [HttpGet("create")]
     public IActionResult CreateUser()
     {
-        var user = new User();
-        var userViewModel = new UserViewModel
-        {
-            User = user,
-            AspAction = "CreateUser"
-        };
-        return View(userViewModel);
+        return View();
     }
-
-    [AllowAnonymous]
+    
     [HttpPost("create")]
     public async Task<IActionResult> CreateUser(User user)
     {
@@ -51,7 +43,41 @@ public class UserController : Controller
         await _userRepository.AddUserToDataBase(user);
         var token = GenerateToken(user);
         AddTokenToCookie(token);
-        return View("UserPage");
+        return RedirectToAction("GetUserPage", user);
+    }
+
+    [HttpGet("login")]
+    public IActionResult Login()
+    {
+        return View();
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(User user)
+    {
+        try
+        {
+            var isLoginPassed = await _userRepository.CheckUserNameAndPassword(user);
+            if (!isLoginPassed)
+            {
+                HttpContext.Response.StatusCode = 400;
+                return BadRequest("Неверный логин или пароль");
+            }
+            var token = GenerateToken(user);
+            AddTokenToCookie(token);
+            return RedirectToAction("GetUserPage",user);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+    
+    [Authorize]
+    public IActionResult GetUserPage(User user)
+    {
+        var userDb = _userRepository.GetUserAsync(user.Name).Result;
+        return View("UserPage", userDb);
     }
 
     private string GenerateToken(User user)
@@ -76,5 +102,13 @@ public class UserController : Controller
             {
                 MaxAge = TimeSpan.FromMinutes(60)
             });
+    }
+
+    private void DeleteTokenFromCookie()
+    {
+        if (HttpContext.Request.Cookies.ContainsKey(".AspNetCore.Cookies"))
+        {
+            HttpContext.Response.Cookies.Delete(".AspNetCore.Cookies");
+        }
     }
 }
