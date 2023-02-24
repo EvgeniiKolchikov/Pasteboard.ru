@@ -42,17 +42,26 @@ public class PasteboardRepositoryPostgres : IPasteboardRepository
         }
     }
 
-    public async Task SendPasteboardToDataBaseAsync(Pasteboard pasteboard)
+    public async Task SendPasteboardToDataBaseAsync(Pasteboard pasteboard, string userName)
     {
-        Logger.Debug("Method SendPasteboardToDataBaseAsync");
-        var pasteboardInDataBase = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Id == pasteboard.Id);
-        if (pasteboardInDataBase is null)
+        try
         {
-            await AddToDataBaseAsync(pasteboard);
+            Logger.Debug("Method SendPasteboardToDataBaseAsync");
+            var userId = _db.Users.FirstOrDefault(u => u.Name == userName).Id;
+            pasteboard.UserId = userId;
+            var pasteboardInDataBase = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Id == pasteboard.Id);
+            if (pasteboardInDataBase is null)
+            {
+                await AddToDataBaseAsync(pasteboard);
+            }
+            else
+            {
+                await EditPasteboardInDataBase(pasteboardInDataBase, pasteboard);
+            }
         }
-        else
+        catch (Exception e)
         {
-            await EditPasteboardInDataBase(pasteboardInDataBase, pasteboard);
+            throw new Exception("ошибка");
         }
     }
 

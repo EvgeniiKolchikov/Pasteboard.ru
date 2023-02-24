@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
 using NLog.Fluent;
@@ -7,6 +8,7 @@ using PasteboardProject.Models;
 
 namespace PasteboardProject.api;
 
+[Authorize]
 [Route("[controller]")]
 public class ApiController : Controller
 {
@@ -47,7 +49,8 @@ public class ApiController : Controller
         Logger.Debug("CreatePasteboard Action");
         try
         {
-            await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard);
+            var userName = HttpContext.User.Identity.Name;
+            await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard, userName);
             await HttpContext.Response.WriteAsJsonAsync(pasteboard);
         }
         catch (Exception e)
@@ -65,7 +68,8 @@ public class ApiController : Controller
         Logger.Debug("EditPasteboard Action");
         try
         {
-            await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard);
+            var userName = HttpContext.User.Identity.Name;
+            await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard, userName);
             await HttpContext.Response.WriteAsJsonAsync(pasteboard);
         }
         catch (CustomException e)

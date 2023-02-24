@@ -36,14 +36,14 @@ public class UserController : Controller
     [HttpPost("create")]
     public async Task<IActionResult> CreateUser(User user)
     {
-        if (_userRepository.HasUserInDataBase(user).Result)
+        if (_userRepository.ExistUserInDataBaseAsync(user).Result)
         {
             return BadRequest("Пользователь с таким именем уже существует");
         }
         await _userRepository.AddUserToDataBase(user);
         var token = GenerateToken(user);
         AddTokenToCookie(token);
-        return RedirectToAction("GetUserPage", user);
+        return RedirectToAction("GetUserPage", user.Name);
     }
 
     [HttpGet("login")]
@@ -57,11 +57,11 @@ public class UserController : Controller
     {
         try
         {
-            var isLoginPassed = await _userRepository.CheckUserNameAndPassword(user);
+            var isLoginPassed = await _userRepository.CheckUserNameAndPasswordAsync(user);
             if (!isLoginPassed)
             {
                 HttpContext.Response.StatusCode = 400;
-                return BadRequest("Неверный логин или пароль");
+                return View();
             }
             var token = GenerateToken(user);
             AddTokenToCookie(token);
@@ -69,7 +69,7 @@ public class UserController : Controller
         }
         catch (Exception e)
         {
-            return BadRequest(e.Message);
+            return View();
         }
     }
     

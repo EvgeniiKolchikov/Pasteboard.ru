@@ -66,8 +66,8 @@ public class PasteboardController : Controller
     {
         Logger.Debug($"This is CreatePasteboard Action: Post");
         var pasteboard = DeleteEmptyFields(pasteboardViewModel);
-        var user = HttpContext.User.Identity;
-        await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard);
+        var userName = HttpContext.User.Identity.Name;
+        await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard, userName);
         var id = pasteboardViewModel.Pasteboard.Id;
         return RedirectToAction("ShowPasteboard", new {id});
     }
@@ -113,11 +113,13 @@ public class PasteboardController : Controller
     public async Task<IActionResult> EditPasteboard(PasteboardViewModel pasteboardViewModel)
     {
         Logger.Debug($"This is EditPasteboard Action: Post");
+        var userName = HttpContext.User.Identity.Name;
         var pasteboard = DeleteEmptyFields(pasteboardViewModel);
-        await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard);
+        await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard, userName);
         var id = pasteboard.Id;
         return RedirectToAction("ShowPasteboard", new{id});
     }
+    
     private List<ActivePasteboardField> AddEmptyFields(List<ActivePasteboardField> activePasteboardField)
     {
         var maxFieldCount = 10;

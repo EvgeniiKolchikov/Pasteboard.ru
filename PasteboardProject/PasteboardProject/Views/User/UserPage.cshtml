@@ -4,17 +4,18 @@
     Layout = "_Layout";
 }
 
-
-
-<h2 class="text-center">@Model.Name</h2>
+<h2 class="text-center">Страница пользователя: @Model.Name</h2>
 <br/>
+
+<h3 class="text-center">Список моих карточек:</h3>
 <body class="text-center">
-    @foreach (var pf in Model.Pasteboards)
+    @foreach (var pasteboard in Model.Pasteboards)
     {
-        <div  class="btn btn-lg bd-btn-lg btn-outline-secondary gap-2 col-4 mx-auto"
-           onclick="('send', 'event', 'Examples', 'Hero', 'Download');">
-            @pf.Name
-        </div><br/>
+        <button type="button" class="btn btn-lg bd-btn-lg btn-outline-secondary gap-2 col-4 mx-auto"
+             onclick="location.href=@Url.Action("EditPasteboard", "Pasteboard", pasteboard.Id)">
+            @pasteboard.Id @pasteboard.Name
+        </button>
+        <br/>
     }
 </body>
 

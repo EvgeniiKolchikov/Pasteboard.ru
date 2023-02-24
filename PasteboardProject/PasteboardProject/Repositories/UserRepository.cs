@@ -27,12 +27,12 @@ public class UserRepository : IUserRepository
         return user;
     }
 
-    public async Task<bool> HasUserInDataBase(User user)
+    public async Task<bool> ExistUserInDataBaseAsync(User user)
     {
         return await _db.Users.AnyAsync(u => u.Name == user.Name);
     }
 
-    public async Task<bool> CheckUserNameAndPassword(User user)
+    public async Task<bool> CheckUserNameAndPasswordAsync(User user)
     {
         var userDb = await _db.Users.FirstOrDefaultAsync(u => u.Name == user.Name);
         if (userDb != null)
