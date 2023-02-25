@@ -1,12 +1,12 @@
-using System.Collections.Immutable;
 using System.IdentityModel.Tokens.Jwt;
-using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.IdentityModel.Tokens;
 using NLog;
+using PasteboardProject.Exceptions;
 using PasteboardProject.Interfaces;
 using PasteboardProject.Models;
 using PasteboardProject.Models.ViewModels;
@@ -20,6 +20,8 @@ public class UserController : Controller
     private readonly IUserRepository _userRepository;
     private readonly IConfiguration _configuration;
     private static readonly Logger Logger = LogManager.GetLogger("UserController");
+    private const int ExpireTokenTime = 60;
+    private const int ExpireCookieTime = 60;
     public UserController(IUserRepository userRepository, IConfiguration configuration)
     {
         _userRepository = userRepository;
@@ -34,16 +36,17 @@ public class UserController : Controller
     }
     
     [HttpPost("create")]
-    public async Task<IActionResult> CreateUser(User user)
+    public async Task<IActionResult> CreateUser(UserViewModel userViewModel)
     {
-        if (_userRepository.ExistUserInDataBaseAsync(user).Result)
-        {
-            return BadRequest("Пользователь с таким именем уже существует");
-        }
+        var userExist = await _userRepository.ExistUserInDataBaseAsync(userViewModel);
+        if (userExist) return View(userViewModel);
+        var user = new User
+            { Name = userViewModel.Name, Email = userViewModel.Email, 
+                Password = userViewModel.Password, Pasteboards = new List<Pasteboard>()};
         await _userRepository.AddUserToDataBase(user);
         var token = GenerateToken(user);
         AddTokenToCookie(token);
-        return RedirectToAction("GetUserPage", user.Name);
+        return View("UserPage", user);
     }
 
     [HttpGet("login")]
@@ -53,32 +56,33 @@ public class UserController : Controller
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(User user)
+    public async Task<IActionResult> Login(UserViewModel userViewModel)
     {
         try
         {
-            var isLoginPassed = await _userRepository.CheckUserNameAndPasswordAsync(user);
-            if (!isLoginPassed)
-            {
-                HttpContext.Response.StatusCode = 400;
-                return View();
-            }
+            var user = await _userRepository.GetUserAsync(userViewModel);
             var token = GenerateToken(user);
             AddTokenToCookie(token);
-            return RedirectToAction("GetUserPage",user);
+            return View("UserPage", user);
+        }
+        catch (CustomException e)
+        {
         }
         catch (Exception e)
         {
-            return View();
+            Logger.Error(e.Message, e.Data, e.StackTrace);
+            return View("~/Views/Error/ErrorPage.cshtml", CustomException.DefaultMessage);
         }
+        return View();
+    }
+
+    [HttpPost]
+    public IActionResult Logout()
+    {
+        DeleteTokenFromCookie();
+        return View("~/Views/Home/Home.cshtml");
     }
     
-    [Authorize]
-    public IActionResult GetUserPage(User user)
-    {
-        var userDb = _userRepository.GetUserAsync(user.Name).Result;
-        return View("UserPage", userDb);
-    }
 
     private string GenerateToken(User user)
     {
@@ -88,7 +92,7 @@ public class UserController : Controller
             issuer: _configuration["Jwt:Issuer"],
             audience: _configuration["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(60)),
+            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(ExpireTokenTime)),
             signingCredentials: new SigningCredentials(new SymmetricSecurityKey(keybytes),
                     SecurityAlgorithms.HmacSha256));
             
@@ -100,7 +104,7 @@ public class UserController : Controller
         HttpContext.Response.Cookies.Append(".AspNetCore.Cookies", token, 
             new CookieOptions
             {
-                MaxAge = TimeSpan.FromMinutes(60)
+                MaxAge = TimeSpan.FromMinutes(ExpireCookieTime)
             });
     }
 

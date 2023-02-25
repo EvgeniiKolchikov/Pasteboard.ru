@@ -1,0 +1,14 @@
+<div>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <a class="btn btn-secondary" >@User.Identity.Name</a>
+        <form asp-action="Logout" asp-controller="User" method="post">
+            <button type="submit" class="btn-secondary">Выйти</button>
+        </form>
+    }
+    else
+    {
+        <a href="@Url.Action("Login", "User")" class="btn-secondary">Войти</a>
+        <a href="@Url.Action("CreateUser", "User")" class="btn-secondary">Регистрация</a>
+    }
+</div>

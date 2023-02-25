@@ -24,3 +24,4 @@ function deleteElement(id)
     let itemListParent = document.querySelector('.show-hide-elements');
     itemListParent.insertBefore(element,null);
 }
+

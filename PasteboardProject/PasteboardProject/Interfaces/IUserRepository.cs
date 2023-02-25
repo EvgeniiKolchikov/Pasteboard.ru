@@ -1,11 +1,11 @@
 using PasteboardProject.Models;
+using PasteboardProject.Models.ViewModels;
 
 namespace PasteboardProject.Interfaces;
 
 public interface IUserRepository
 {
-    Task<User> GetUserAsync(string name);
-    Task<bool> ExistUserInDataBaseAsync(User user);
+    Task<User> GetUserAsync(UserViewModel userViewModel);
+    Task<bool> ExistUserInDataBaseAsync(UserViewModel userViewModel);
     Task AddUserToDataBase(User user);
-    Task<bool> CheckUserNameAndPasswordAsync(User user);
 }

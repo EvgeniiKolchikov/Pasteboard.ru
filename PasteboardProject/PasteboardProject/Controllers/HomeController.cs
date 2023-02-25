@@ -17,16 +17,4 @@ public class HomeController : Controller
     {
         return View();
     }
-    
-    [HttpGet("myaccount")]
-    public IActionResult MyAccount()
-    {
-        
-        if (HttpContext.User.Identity.IsAuthenticated)
-        {
-            return RedirectToAction("GetUserPage", "User", HttpContext.User.Identity);
-        }
-
-        return View("~/Views/Error/ErrorPage.cshtml", "Выполните вход или зарегистрируйтесь");
-    }
 }

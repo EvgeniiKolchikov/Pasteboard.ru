@@ -119,7 +119,13 @@ public class PasteboardController : Controller
         var id = pasteboard.Id;
         return RedirectToAction("ShowPasteboard", new{id});
     }
-    
+
+    [HttpPost]
+    public async Task DeletePasteboard(Pasteboard pasteboard)
+    {
+        await _pasteboardRepository.DeletePasteboard(pasteboard);
+    }
+
     private List<ActivePasteboardField> AddEmptyFields(List<ActivePasteboardField> activePasteboardField)
     {
         var maxFieldCount = 10;

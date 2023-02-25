@@ -25,7 +25,7 @@ public class PasteboardRepositoryPostgres : IPasteboardRepository
             var pasteboard = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Id == intId);
             if (pasteboard is null)
             {
-                throw new CustomException(CustomException.NotFoundMessage);
+                throw new CustomException(CustomException.PasteboardNotFoundMessage);
             }
             pasteboard.PasteboardFields = _db.PasteboardFields.Where(pf => pf.PasteboardId == intId).ToList();
             return pasteboard;
@@ -35,7 +35,7 @@ public class PasteboardRepositoryPostgres : IPasteboardRepository
             var pasteboard = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Name == id);
             if (pasteboard is null)
             {
-                throw new CustomException(CustomException.NotFoundMessage);
+                throw new CustomException(CustomException.PasteboardNotFoundMessage);
             }
             pasteboard.PasteboardFields = _db.PasteboardFields.Where(pf => pf.PasteboardId == pasteboard.Id).ToList();
             return pasteboard;
@@ -63,6 +63,12 @@ public class PasteboardRepositoryPostgres : IPasteboardRepository
         {
             throw new Exception("ошибка");
         }
+    }
+
+    public async Task DeletePasteboard(Pasteboard pasteboard)
+    {
+        _db.Pasteboards.Remove(pasteboard);
+        await _db.SaveChangesAsync();
     }
 
     private async Task AddToDataBaseAsync(Pasteboard pasteboard)

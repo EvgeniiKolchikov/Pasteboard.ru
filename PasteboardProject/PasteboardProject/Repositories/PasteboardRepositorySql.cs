@@ -20,14 +20,14 @@
 //         if (isInt)
 //         {
 //             var pasteboard = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Id == intId);
-//             if (pasteboard is null) throw new CustomException(CustomException.NotFoundMessage);
+//             if (pasteboard is null) throw new CustomException(CustomException.PasteboardNotFoundMessage);
 //             pasteboard.PasteboardFields = _db.PasteboardFields.Where(pf => pf.PasteboardId == intId).ToList();
 //             return pasteboard;
 //         }
 //         else
 //         {
 //             var pasteboard = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Name == id);
-//             if (pasteboard is null) throw new CustomException(CustomException.NotFoundMessage);
+//             if (pasteboard is null) throw new CustomException(CustomException.PasteboardNotFoundMessage);
 //             pasteboard.PasteboardFields = _db.PasteboardFields.Where(pf => pf.PasteboardId == pasteboard.Id).ToList();
 //             return pasteboard;
 //         }

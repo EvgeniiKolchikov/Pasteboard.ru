@@ -2,6 +2,7 @@ namespace PasteboardProject.Models.ViewModels;
 
 public class UserViewModel
 {
-    public User User { get; set; }
-    public string AspAction { get; set; }
+    public string Name { get; set; }
+    public string Password { get; set; }
+    public string Email { get; set; }
 }
