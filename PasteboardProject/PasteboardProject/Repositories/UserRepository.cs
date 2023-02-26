@@ -15,7 +15,7 @@ public class UserRepository : IUserRepository
 {
     private readonly ApplicationContext _db;
     private static readonly Logger Logger = LogManager.GetLogger("User Repository");
-    private string Salt { get; set; } = "2E7A44BC-0377-4BD0-BB88-EA806080DDBB";
+    private const string Salt = "2E7A44BC-0377-4BD0-BB88-EA806080DDBB";
     public UserRepository(ApplicationContext context)
     {
         _db = context;

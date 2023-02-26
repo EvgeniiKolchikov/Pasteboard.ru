@@ -30,13 +30,13 @@ public class UserController : Controller
     }
     
     [HttpGet("create")]
-    public IActionResult CreateUser()
+    public IActionResult Register()
     {
         return View();
     }
     
     [HttpPost("create")]
-    public async Task<IActionResult> CreateUser(UserViewModel userViewModel)
+    public async Task<IActionResult> Register(UserViewModel userViewModel)
     {
         var userExist = await _userRepository.ExistUserInDataBaseAsync(userViewModel);
         if (userExist) return View(userViewModel);

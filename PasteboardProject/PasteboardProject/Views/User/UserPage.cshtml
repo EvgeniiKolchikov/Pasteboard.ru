@@ -7,7 +7,7 @@
 <h2 class="text-center">Страница пользователя: @Model.Name</h2>
 <br/>
 
-<h3 class="text-center">Список моих карточек:</h3> 
+<h3 class="text-center">Список моих карточек:</h3>
 <br/>
 <body class="text-center">
 @foreach (var pasteboard in Model.Pasteboards)
@@ -16,12 +16,12 @@
         @pasteboard.Name
     </a>
     <br/>
-    <button class="btn btn-outline-secondary" type="button" 
+    <button class="btn btn-outline-secondary" type="button"
             onclick="location.href='@Url.Action("EditPasteboard", "Pasteboard", new { pasteboard.Id })'">Изменить</button>
     <button class="btn btn-outline-secondary" type="button" >Удалить</button>
     <br/>
 }
 </body>
-<button class="btn btn-outline-secondary gap-2 col-3 mx-auto" type="button" 
+<button class="btn btn-outline-secondary gap-2 col-3 mx-auto" type="button"
         onclick="location.href='@Url.Action("CreatePasteboard", "Pasteboard")'">Добавить</button>
 
