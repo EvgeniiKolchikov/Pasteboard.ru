@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
@@ -22,23 +23,35 @@ public class UserRepository : IUserRepository
         Logger.Debug("User Repository in");
     }
 
-    public async Task<User> GetUserAsync(UserViewModel userViewModel)
+    public async Task<UserViewModel> GetUserAsync(LoginViewModel loginViewModel)
     {
-        var hashPassword = GetHashPassword(userViewModel.Name, userViewModel.Password);
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Name == userViewModel.Name && u.Password == hashPassword);
+        var hashPassword = GetHashPassword(loginViewModel.Email, loginViewModel.Password);
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == loginViewModel.Email && u.Password == hashPassword);
         if (user == null) throw new CustomException(CustomException.DefaultMessage);
-        user.Pasteboards = await _db.Pasteboards.Where(p => p.UserId == user.Id).ToListAsync();
-        return user;
+        var userViewModel = new UserViewModel
+        {
+            Name = user.Name,
+            Email = user.Email,
+            Pasteboards = await _db.Pasteboards.Where(p => p.UserId == user.Id).ToListAsync()
+        };
+        return userViewModel;
     }
     
-    public async Task<bool> ExistUserInDataBaseAsync(UserViewModel userViewModel)
+    public async Task<bool> ExistUserInDataBaseAsync(RegisterViewModel registerViewModel)
     {
-        return await _db.Users.AnyAsync(u => u.Name == userViewModel.Name);
+        return await _db.Users.AnyAsync(u => u.Email == registerViewModel.Email && u.Name == registerViewModel.Name);
     }
     
-    public async Task AddUserToDataBase(User user)
+    public async Task AddUserToDataBase(RegisterViewModel registerViewModel)
     {
-        user.Password = GetHashPassword(user.Name, user.Password);
+        var user = new User
+        {
+            Name = registerViewModel.Name,
+            Email = registerViewModel.Email,
+            Password = GetHashPassword(registerViewModel.Email, registerViewModel.Password),
+            RegistrationDateTime = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture),
+            LastVisitDateTime = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)
+        };
         await _db.Users.AddAsync(user);
         await _db.SaveChangesAsync();
     }

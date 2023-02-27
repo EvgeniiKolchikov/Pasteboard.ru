@@ -1,4 +1,4 @@
-@model PasteboardProject.Models.User;
+@model PasteboardProject.Models.ViewModels.UserViewModel;
 
 @{
     Layout = "_Layout";
@@ -16,9 +16,9 @@
         @pasteboard.Name
     </a>
     <br/>
-    <button class="btn btn-outline-secondary" type="button"
-            onclick="location.href='@Url.Action("EditPasteboard", "Pasteboard", new { pasteboard.Id })'">Изменить</button>
-    <button class="btn btn-outline-secondary" type="button" >Удалить</button>
+    <a class="btn btn-outline-secondary" type="button"
+            href=@Url.Action("EditPasteboard", "Pasteboard", new { pasteboard.Id })>Изменить</a>
+    <a class="btn btn-outline-secondary" type="button" >Удалить</a>
     <br/>
 }
 </body>

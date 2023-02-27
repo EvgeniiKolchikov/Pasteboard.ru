@@ -5,7 +5,7 @@ namespace PasteboardProject.Interfaces;
 
 public interface IUserRepository
 {
-    Task<User> GetUserAsync(UserViewModel userViewModel);
-    Task<bool> ExistUserInDataBaseAsync(UserViewModel userViewModel);
-    Task AddUserToDataBase(User user);
+    Task<UserViewModel> GetUserAsync(LoginViewModel loginViewModel);
+    Task<bool> ExistUserInDataBaseAsync(RegisterViewModel registerViewModel);
+    Task AddUserToDataBase(RegisterViewModel registerViewModel);
 }

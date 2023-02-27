@@ -29,24 +29,27 @@ public class UserController : Controller
         Logger.Debug("User Controller in");
     }
     
-    [HttpGet("create")]
+    [HttpGet("register")]
     public IActionResult Register()
     {
         return View();
     }
     
-    [HttpPost("create")]
-    public async Task<IActionResult> Register(UserViewModel userViewModel)
+    [HttpPost("register")]
+    public async Task<IActionResult> Register(RegisterViewModel registerViewModel)
     {
-        var userExist = await _userRepository.ExistUserInDataBaseAsync(userViewModel);
-        if (userExist) return View(userViewModel);
-        var user = new User
-            { Name = userViewModel.Name, Email = userViewModel.Email, 
-                Password = userViewModel.Password, Pasteboards = new List<Pasteboard>()};
-        await _userRepository.AddUserToDataBase(user);
-        var token = GenerateToken(user);
+        var userExist = await _userRepository.ExistUserInDataBaseAsync(registerViewModel);
+        if (userExist) return View(registerViewModel); // добавить exception
+        await _userRepository.AddUserToDataBase(registerViewModel);
+        var token = GenerateToken(registerViewModel);
         AddTokenToCookie(token);
-        return View("UserPage", user);
+        var userViewModel = new UserViewModel()
+            {
+                Name = registerViewModel.Name, 
+                Email = registerViewModel.Email, 
+                Pasteboards = new List<Pasteboard>()
+            };
+        return View("UserPage", userViewModel);
     }
 
     [HttpGet("login")]
@@ -56,14 +59,14 @@ public class UserController : Controller
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(UserViewModel userViewModel)
+    public async Task<IActionResult> Login(LoginViewModel loginViewModel)
     {
         try
         {
-            var user = await _userRepository.GetUserAsync(userViewModel);
-            var token = GenerateToken(user);
+            var userViewModel = await _userRepository.GetUserAsync(loginViewModel);
+            var token = GenerateToken(loginViewModel);
             AddTokenToCookie(token);
-            return View("UserPage", user);
+            return View("UserPage", userViewModel);
         }
         catch (CustomException e)
         {
@@ -84,9 +87,9 @@ public class UserController : Controller
     }
     
 
-    private string GenerateToken(User user)
+    private string GenerateToken(ITokenGenerated user)
     {
-        var claims = new List<Claim> {new Claim(ClaimTypes.Name, user.Name) };
+        var claims = new List<Claim> {new Claim(ClaimTypes.Email, user.Email) };
         var keybytes = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
         var jwt = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"],

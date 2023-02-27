@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using PasteboardProject.Interfaces;
 
 namespace PasteboardProject.Models.ViewModels;
 
-public class RegisterViewModel
+public class RegisterViewModel : ITokenGenerated
 {
     [Required(ErrorMessage = "Введите имя")]
     public string Name { get; set; }
