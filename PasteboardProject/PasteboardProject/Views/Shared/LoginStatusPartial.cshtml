@@ -1,14 +1,19 @@
 <div>
     @if (User.Identity.IsAuthenticated)
     {
-        <a >@User.Identity.Name</a>
-        <form asp-action="Logout" asp-controller="User" method="post">
-            <button type="submit" class="text-dark">Выйти</button>
-        </form>
+        <div id="authorized" class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+            <ul class="navbar-nav flex-grow-1">
+                <li class="nav-item">
+                    <form asp-action="Logout" asp-controller="User" method="post">
+                        <button type="submit">Выйти</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
     }
     else
     {
-        <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+        <div id="non-authorized" class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
             <ul class="navbar-nav flex-grow-1">
                 <li class="nav-item">
                     <a class="nav-link text-dark" asp-controller="User" asp-action="Login">Вход</a>

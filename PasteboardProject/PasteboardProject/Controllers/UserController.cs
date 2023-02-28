@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -22,19 +23,23 @@ public class UserController : Controller
     private static readonly Logger Logger = LogManager.GetLogger("UserController");
     private const int ExpireTokenTime = 60;
     private const int ExpireCookieTime = 60;
+   
     public UserController(IUserRepository userRepository, IConfiguration configuration)
     {
         _userRepository = userRepository;
         _configuration = configuration;
+       
         Logger.Debug("User Controller in");
     }
     
+
     [HttpGet("register")]
     public IActionResult Register()
     {
         return View();
     }
     
+ 
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterViewModel registerViewModel)
     {
@@ -49,13 +54,13 @@ public class UserController : Controller
                 Email = registerViewModel.Email, 
                 Pasteboards = new List<Pasteboard>()
             };
-        return View("UserPage", userViewModel);
+        return RedirectToPage("UserPage", userViewModel);
     }
 
     [HttpGet("login")]
     public IActionResult Login()
     {
-        return View();
+        return View("Login");
     }
 
     [HttpPost("login")]
@@ -76,20 +81,47 @@ public class UserController : Controller
             Logger.Error(e.Message, e.Data, e.StackTrace);
             return View("~/Views/Error/ErrorPage.cshtml", CustomException.DefaultMessage);
         }
-        return View();
+        return View(loginViewModel);
     }
 
     [HttpPost]
     public IActionResult Logout()
     {
         DeleteTokenFromCookie();
-        return View("~/Views/Home/Home.cshtml");
+        return View("~/Views/Home/Index.cshtml");
     }
-    
 
+    [Authorize(Roles = "User, Administrator")]
+    public async Task<IActionResult> UserPage()
+    {
+        if (!User.Identity.IsAuthenticated)
+            return View("~/Views/Error/ErrorPage.cshtml", CustomException.AccessDeniedMessage);
+        var userViewModel = await _userRepository.GetUserAuthorizedAsync
+            (User.FindFirstValue(ClaimTypes.Email));
+        return View(userViewModel);
+    }
+
+    [Authorize(Roles = "Administrator")]
+    [HttpGet("Administrator")]
+    public async Task<IActionResult> AdminPage()
+    {
+        var userList = await _userRepository.GetUserListAsync();
+        return View("~/Views/Admin/AdminPage.cshtml",userList);
+    }
     private string GenerateToken(ITokenGenerated user)
     {
-        var claims = new List<Claim> {new Claim(ClaimTypes.Email, user.Email) };
+        var claims = new List<Claim>();
+        if (user.Email == "admin@pasteboard.ru")
+        {
+            claims.Add(new Claim(ClaimTypes.Email, user.Email));
+            claims.Add(new Claim(ClaimTypes.Role,"Administrator"));
+        }
+        else
+        {
+            claims.Add(new Claim(ClaimTypes.Email, user.Email));
+            claims.Add(new Claim(ClaimTypes.Role,"User"));
+        }
+        
         var keybytes = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
         var jwt = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"],
@@ -104,7 +136,7 @@ public class UserController : Controller
 
     private void AddTokenToCookie(string token)
     {
-        HttpContext.Response.Cookies.Append(".AspNetCore.Cookies", token, 
+        HttpContext.Response.Cookies.Append(".AspNetCore.PasteboardCookie", token, 
             new CookieOptions
             {
                 MaxAge = TimeSpan.FromMinutes(ExpireCookieTime)
@@ -113,9 +145,9 @@ public class UserController : Controller
 
     private void DeleteTokenFromCookie()
     {
-        if (HttpContext.Request.Cookies.ContainsKey(".AspNetCore.Cookies"))
+        if (HttpContext.Request.Cookies.ContainsKey(".AspNetCore.PasteboardCookie"))
         {
-            HttpContext.Response.Cookies.Delete(".AspNetCore.Cookies");
+            HttpContext.Response.Cookies.Delete(".AspNetCore.PasteboardCookie");
         }
     }
 }

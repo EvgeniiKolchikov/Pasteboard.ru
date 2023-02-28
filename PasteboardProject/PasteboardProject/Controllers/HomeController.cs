@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,8 +8,10 @@ namespace PasteboardProject.Controllers;
 public class HomeController : Controller
 {
     [HttpGet("")]
-    public IActionResult Home()
+    public IActionResult Index()
     {
+        ViewBag.Name = User.FindFirstValue(ClaimTypes.Email);
+        ViewBag.IsAuthenticated = User.Identity.IsAuthenticated;
         return View();
     }
 

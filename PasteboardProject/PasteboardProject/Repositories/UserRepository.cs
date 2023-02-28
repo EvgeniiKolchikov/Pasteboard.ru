@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.EntityFrameworkCore;
 using NLog;
@@ -36,7 +37,20 @@ public class UserRepository : IUserRepository
         };
         return userViewModel;
     }
-    
+
+    public async Task<UserViewModel> GetUserAuthorizedAsync(string email)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (user == null) throw new CustomException(CustomException.DefaultMessage);
+        var userViewModel = new UserViewModel
+        {
+            Name = user.Name,
+            Email = user.Email,
+            Pasteboards = await _db.Pasteboards.Where(p => p.UserId == user.Id).ToListAsync()
+        };
+        return userViewModel;
+    }
+
     public async Task<bool> ExistUserInDataBaseAsync(RegisterViewModel registerViewModel)
     {
         return await _db.Users.AnyAsync(u => u.Email == registerViewModel.Email && u.Name == registerViewModel.Name);
@@ -54,6 +68,16 @@ public class UserRepository : IUserRepository
         };
         await _db.Users.AddAsync(user);
         await _db.SaveChangesAsync();
+    }
+
+    public async Task<List<UsersListViewModel>> GetUserListAsync()
+    {
+        return await _db.Users.Select(u => new UsersListViewModel
+        {
+            Email = u.Email,
+            RegistrationDate = u.RegistrationDateTime,
+            LastVisitDate = u.LastVisitDateTime
+        }).ToListAsync();
     }
 
     private string GetHashPassword(string userName, string password)

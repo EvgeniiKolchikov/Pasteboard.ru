@@ -25,3 +25,17 @@ function deleteElement(id)
     itemListParent.insertBefore(element,null);
 }
 
+function swapLoginLogout()
+{
+    let cookieExist = document.cookie.match(/^(.*;)?\s*PasteboardCookie\s*=\s*[^;]+(.*)?$/)
+    if (cookieExist == null)
+    {
+        document.getElementById("non-authorized").style.display = "block";
+        document.getElementById("authorized").style.display = "none";
+    }
+    if (cookieExist == null)
+    {
+        document.getElementById("non-authorized").style.display = "none";
+        document.getElementById("authorized").style.display = "block";
+    }
+}

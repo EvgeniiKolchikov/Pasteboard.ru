@@ -1,0 +1,28 @@
+@model List<PasteboardProject.Models.ViewModels.UsersListViewModel>;
+@{
+    Layout = "_Layout";
+}
+
+<h2 class="text-center">Список пользователей</h2>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Email</th>
+        <th scope="col">Дата регистрации</th>
+        <th scope="col">Последний визит</th>
+    </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Count;i++)
+        {
+            <tr>
+                <th scope="row">@(i + 1)</th>
+                <td>@Model[i].Email</td>
+                <td>@Model[i].RegistrationDate</td>
+                <td>@Model[i].LastVisitDate</td>
+            </tr>
+        }
+    </tbody>
+</table>

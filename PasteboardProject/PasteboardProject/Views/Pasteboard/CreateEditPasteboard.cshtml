@@ -9,11 +9,11 @@
 <form asp-action="@Model.AspAction" asp-controller="Pasteboard" method="post">
     <div class="text-center gap-2 col-4 mx-auto">
         <div>
-            <input asp-for="Pasteboard.Id" type="hidden"/>
+            <input asp-for="Id" type="hidden"/>
         </div>
         <div>
-            <input type="text" class="text-center gap-2 col-4 mx-auto form-control" asp-for="Pasteboard.Name" placeholder="Введите имя или ник"/>
-            <span asp-validation-for="Pasteboard.Name" class="text-danger"></span><br/>
+            <input type="text" class="text-center gap-2 col-4 mx-auto form-control" asp-for="Name" placeholder="Введите имя вашей визитки"/>
+            <span asp-validation-for="Name" class="text-danger"></span><br/>
         </div>
         <br/>
         <div class="show-hide-elements">
@@ -27,14 +27,14 @@
                     <span asp-validation-for="ActivePasteboardFields[i].FieldValue" class="text-danger"></span>
                     <input id="@(i)checkbox" type="checkbox" hidden="hidden" value="@Model.ActivePasteboardFields[i].IsActive" asp-for="@Model.ActivePasteboardFields[i].IsActive">
                     <div>
-                        <a class="btn btn-outline-secondary gap-2 col-3 mx-auto" type="button" onclick="deleteElement(@i)">Удалить</a>
+                        <a class="btn btn-primary py-0" type="button" onclick="deleteElement(@i)">Удалить</a>
                     </div>
                 </div>
             }
             <br/>
         </div>
         <div>
-            <button class="btn btn-outline-secondary gap-2 col-3 mx-auto" type="button" onclick="addElement()">Добавить</button>
+            <button class="btn btn-primary py-0" type="button" onclick="addElement()">Добавить</button>
         </div>
         <div>
             <input class="btn btn-outline-secondary" type="submit"/>

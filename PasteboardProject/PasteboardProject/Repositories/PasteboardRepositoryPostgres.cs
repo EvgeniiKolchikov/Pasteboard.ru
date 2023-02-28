@@ -42,12 +42,36 @@ public class PasteboardRepositoryPostgres : IPasteboardRepository
         }
     }
 
-    public async Task SendPasteboardToDataBaseAsync(Pasteboard pasteboard, string userName)
+    public async Task<Pasteboard> GetPasteboardByIdWithUserCheckAsync(string id, string userEmail)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+        var isInt = int.TryParse(id, out var intId);
+        if (isInt)
+        {
+            var pasteboard = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Id == intId);
+            if (pasteboard.UserId != user.Id) throw new CustomException(CustomException.AccessDeniedMessage);
+            if (pasteboard is null) throw new CustomException(CustomException.PasteboardNotFoundMessage);
+            pasteboard.PasteboardFields = _db.PasteboardFields.Where(pf => pf.PasteboardId == intId).ToList();
+            return pasteboard;
+        }
+        else
+        {
+            var pasteboard = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Name == id);
+            if (pasteboard is null)
+            {
+                throw new CustomException(CustomException.PasteboardNotFoundMessage);
+            }
+            pasteboard.PasteboardFields = _db.PasteboardFields.Where(pf => pf.PasteboardId == pasteboard.Id).ToList();
+            return pasteboard;
+        }
+    }
+
+    public async Task SendPasteboardToDataBaseAsync(Pasteboard pasteboard, string userEmail)
     {
         try
         {
             Logger.Debug("Method SendPasteboardToDataBaseAsync");
-            var userId = _db.Users.FirstOrDefault(u => u.Name == userName).Id;
+            var userId = _db.Users.FirstOrDefault(u => u.Email == userEmail).Id;
             pasteboard.UserId = userId;
             var pasteboardInDataBase = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Id == pasteboard.Id);
             if (pasteboardInDataBase is null)

@@ -26,7 +26,6 @@ try
     builder.Services.AddControllersWithViews();
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
-    builder.Services.AddAuthorization();
     builder.Services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -54,18 +53,27 @@ try
                 ValidateIssuerSigningKey = true,
             };
         });
+    builder.Services.AddAuthorization(options =>
+    {
+        options.AddPolicy("Administrator", adminBuilder =>
+        {
+            adminBuilder.RequireClaim(ClaimTypes.Role, "Administrator");
+        });
+        options.AddPolicy("User", userBuilder =>
+        {
+            userBuilder.RequireClaim(ClaimTypes.Role, "User");
+        });
+    });
 
     var app = builder.Build();
 
     if (!app.Environment.IsDevelopment())
     {
-        app.UseExceptionHandler("/Home/Error");
+        app.UseExceptionHandler("/Index/Error");
         // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         app.UseHsts();
     }
-    
-    
-    
+
     app.UseHttpsRedirection();
 
     app.UseStaticFiles();
@@ -74,14 +82,14 @@ try
     {
         MinimumSameSitePolicy = SameSiteMode.Strict,
         HttpOnly = HttpOnlyPolicy.Always,
-        Secure = CookieSecurePolicy.Always
+        Secure = CookieSecurePolicy.Always,
     });
     
     app.UseRouting();
     
     app.Use(async (context, next) =>
     {
-        var token = context.Request.Cookies[".AspNetCore.Cookies"];
+        var token = context.Request.Cookies[".AspNetCore.PasteboardCookie"];
         if (!string.IsNullOrEmpty(token))
             context.Request.Headers.Add("Authorization", "Bearer " + token);
  
