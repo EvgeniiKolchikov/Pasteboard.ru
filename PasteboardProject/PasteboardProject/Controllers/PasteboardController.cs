@@ -104,21 +104,36 @@ public class PasteboardController : Controller
     }
     
     [HttpPost]
-    [Route("edit/{id}")]
+    [Route("edit/")]
     public async Task<IActionResult> EditPasteboard(PasteboardViewModel pasteboardViewModel)
     {
-        Logger.Debug($"This is EditPasteboard Action: Post");
-        var userEmail = User.FindFirstValue(ClaimTypes.Email);
-        var pasteboard = DeleteEmptyFields(pasteboardViewModel);
-        await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard, userEmail);
-        var id = pasteboard.Id;
-        return RedirectToAction("ShowPasteboard", new{id});
+        try
+        {
+            Logger.Debug($"This is EditPasteboard Action: Post");
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+            var pasteboard = DeleteEmptyFields(pasteboardViewModel);
+            await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard, userEmail);
+            var id = pasteboard.Id;
+            return RedirectToAction("ShowPasteboard", new{id});
+        }
+        catch (Exception e)
+        {
+            return View("~/Views/Error/ErrorPage.cshtml", e.Message);
+        }
     }
-
-    [HttpPost]
-    public async Task DeletePasteboard(Pasteboard pasteboard)
+    
+    [HttpGet("delete")]
+    public async Task<IActionResult> DeletePasteboard(string id)
     {
-        await _pasteboardRepository.DeletePasteboard(pasteboard);
+        try
+        {
+            await _pasteboardRepository.DeletePasteboardAsync(id);
+            return RedirectToAction("UserPage", "User");
+        }
+        catch (Exception e)
+        {
+            return View("~/Views/Error/ErrorPage.cshtml", e.Message);
+        }
     }
 
     private List<ActivePasteboardField> AddEmptyFields(List<ActivePasteboardField> activePasteboardField)

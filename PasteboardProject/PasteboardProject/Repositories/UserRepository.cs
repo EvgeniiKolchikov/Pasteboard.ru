@@ -24,11 +24,14 @@ public class UserRepository : IUserRepository
         Logger.Debug("User Repository in");
     }
 
-    public async Task<UserViewModel> GetUserAsync(LoginViewModel loginViewModel)
+    public async Task<UserViewModel> GetUserViewModelLoginAsync(LoginViewModel loginViewModel)
     {
         var hashPassword = GetHashPassword(loginViewModel.Email, loginViewModel.Password);
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == loginViewModel.Email && u.Password == hashPassword);
         if (user == null) throw new CustomException(CustomException.DefaultMessage);
+        user.LastVisitDateTime = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture);
+        _db.Users.Update(user);
+        await _db.SaveChangesAsync();
         var userViewModel = new UserViewModel
         {
             Name = user.Name,
@@ -38,7 +41,7 @@ public class UserRepository : IUserRepository
         return userViewModel;
     }
 
-    public async Task<UserViewModel> GetUserAuthorizedAsync(string email)
+    public async Task<UserViewModel> GetUserViewModelAuthorizedAsync(string email)
     {
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
         if (user == null) throw new CustomException(CustomException.DefaultMessage);
@@ -56,7 +59,7 @@ public class UserRepository : IUserRepository
         return await _db.Users.AnyAsync(u => u.Email == registerViewModel.Email && u.Name == registerViewModel.Name);
     }
     
-    public async Task AddUserToDataBase(RegisterViewModel registerViewModel)
+    public async Task AddUserToDataBaseAsync(RegisterViewModel registerViewModel)
     {
         var user = new User
         {
@@ -67,6 +70,19 @@ public class UserRepository : IUserRepository
             LastVisitDateTime = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)
         };
         await _db.Users.AddAsync(user);
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task UpdateUserAsync(EditViewModel editViewModel)
+    {
+        var hashOldPassword = GetHashPassword(editViewModel.Email, editViewModel.OldPassword);
+        var user = await _db.Users.FirstOrDefaultAsync(u =>
+            u.Email == editViewModel.Email && u.Password == hashOldPassword);
+        if (user == null) throw new CustomException(CustomException.DefaultMessage);
+        var hashNewPassword = GetHashPassword(editViewModel.Email, editViewModel.Password);
+        user.Name = editViewModel.Name;
+        user.Password = hashNewPassword;
+        _db.Users.Update(user);
         await _db.SaveChangesAsync();
     }
 

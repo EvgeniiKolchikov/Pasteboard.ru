@@ -68,31 +68,33 @@ public class PasteboardRepositoryPostgres : IPasteboardRepository
 
     public async Task SendPasteboardToDataBaseAsync(Pasteboard pasteboard, string userEmail)
     {
-        try
+
+        Logger.Debug("Method SendPasteboardToDataBaseAsync");
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+        if (user == null) throw new CustomException(CustomException.DefaultMessage);
+        pasteboard.UserId = user.Id;
+        var pasteboardInDataBase = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Id == pasteboard.Id);
+        if (pasteboardInDataBase is null)
         {
-            Logger.Debug("Method SendPasteboardToDataBaseAsync");
-            var userId = _db.Users.FirstOrDefault(u => u.Email == userEmail).Id;
-            pasteboard.UserId = userId;
-            var pasteboardInDataBase = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Id == pasteboard.Id);
-            if (pasteboardInDataBase is null)
-            {
-                await AddToDataBaseAsync(pasteboard);
-            }
-            else
-            {
-                await EditPasteboardInDataBase(pasteboardInDataBase, pasteboard);
-            }
+            await AddToDataBaseAsync(pasteboard);
         }
-        catch (Exception e)
+        else
         {
-            throw new Exception("ошибка");
+            await EditPasteboardInDataBaseAsync(pasteboardInDataBase, pasteboard);
         }
     }
 
-    public async Task DeletePasteboard(Pasteboard pasteboard)
+    public async Task DeletePasteboardAsync(string id)
     {
-        _db.Pasteboards.Remove(pasteboard);
-        await _db.SaveChangesAsync();
+        var isInt = int.TryParse(id, out int result);
+        if (isInt)
+        {
+            var pasteboard = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Id == result);
+            if (pasteboard == null) throw new CustomException(CustomException.PasteboardNotFoundMessage);
+            _db.Pasteboards.Remove(pasteboard);
+            await _db.SaveChangesAsync();
+        }
+        else throw new CustomException(CustomException.DefaultMessage);
     }
 
     private async Task AddToDataBaseAsync(Pasteboard pasteboard)
@@ -102,7 +104,7 @@ public class PasteboardRepositoryPostgres : IPasteboardRepository
         await _db.SaveChangesAsync();
     }
 
-    private async Task EditPasteboardInDataBase(Pasteboard pasteboardInDataBase, Pasteboard pasteboardForEdit)
+    private async Task EditPasteboardInDataBaseAsync(Pasteboard pasteboardInDataBase, Pasteboard pasteboardForEdit)
     {
         Logger.Debug($"Edit Pasteboard {pasteboardInDataBase.Name}");
         pasteboardInDataBase.Name = pasteboardForEdit.Name;

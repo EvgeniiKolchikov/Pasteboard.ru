@@ -1,6 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -45,7 +48,7 @@ public class UserController : Controller
     {
         var userExist = await _userRepository.ExistUserInDataBaseAsync(registerViewModel);
         if (userExist) return View(registerViewModel); // добавить exception
-        await _userRepository.AddUserToDataBase(registerViewModel);
+        await _userRepository.AddUserToDataBaseAsync(registerViewModel);
         var token = GenerateToken(registerViewModel);
         AddTokenToCookie(token);
         var userViewModel = new UserViewModel()
@@ -54,7 +57,8 @@ public class UserController : Controller
                 Email = registerViewModel.Email, 
                 Pasteboards = new List<Pasteboard>()
             };
-        return RedirectToPage("UserPage", userViewModel);
+        
+        return RedirectToAction("UserPage", new {userViewModel});
     }
 
     [HttpGet("login")]
@@ -68,41 +72,64 @@ public class UserController : Controller
     {
         try
         {
-            var userViewModel = await _userRepository.GetUserAsync(loginViewModel);
+            var userViewModel = await _userRepository.GetUserViewModelLoginAsync(loginViewModel);
             var token = GenerateToken(loginViewModel);
             AddTokenToCookie(token);
-            return View("UserPage", userViewModel);
+            return RedirectToAction("UserPage",new {userViewModel});
         }
         catch (CustomException e)
         {
+            return View(loginViewModel);
         }
         catch (Exception e)
         {
             Logger.Error(e.Message, e.Data, e.StackTrace);
             return View("~/Views/Error/ErrorPage.cshtml", CustomException.DefaultMessage);
         }
-        return View(loginViewModel);
     }
 
-    [HttpPost]
+    
+    [Authorize]
+    [HttpGet("logout")]
     public IActionResult Logout()
     {
         DeleteTokenFromCookie();
-        return View("~/Views/Home/Index.cshtml");
+        return RedirectToAction("Index","Home");
+    }
+
+    [Authorize]
+    [HttpGet("edit")]
+    public IActionResult EditUser()
+    {
+        var editViewModel = new EditViewModel
+        {
+            Email = User.FindFirstValue(ClaimTypes.Email)
+        };
+        return View(editViewModel);
+    }
+    
+    [Authorize]
+    [HttpPost("edit")]
+    public async Task<IActionResult> EditUser(EditViewModel editViewModel)
+    {
+        await _userRepository.UpdateUserAsync(editViewModel);
+        var userViewModel = await _userRepository.GetUserViewModelAuthorizedAsync(User.FindFirstValue(ClaimTypes.Email));
+        return RedirectToAction("UserPage", new {userViewModel});
     }
 
     [Authorize(Roles = "User, Administrator")]
+    [HttpGet("profile")]
     public async Task<IActionResult> UserPage()
     {
         if (!User.Identity.IsAuthenticated)
             return View("~/Views/Error/ErrorPage.cshtml", CustomException.AccessDeniedMessage);
-        var userViewModel = await _userRepository.GetUserAuthorizedAsync
+        var userViewModel = await _userRepository.GetUserViewModelAuthorizedAsync
             (User.FindFirstValue(ClaimTypes.Email));
         return View(userViewModel);
     }
 
     [Authorize(Roles = "Administrator")]
-    [HttpGet("Administrator")]
+    [HttpGet("admin")]
     public async Task<IActionResult> AdminPage()
     {
         var userList = await _userRepository.GetUserListAsync();
@@ -111,14 +138,13 @@ public class UserController : Controller
     private string GenerateToken(ITokenGenerated user)
     {
         var claims = new List<Claim>();
+        claims.Add(new Claim(ClaimTypes.Email, user.Email));
         if (user.Email == "admin@pasteboard.ru")
         {
-            claims.Add(new Claim(ClaimTypes.Email, user.Email));
             claims.Add(new Claim(ClaimTypes.Role,"Administrator"));
         }
         else
         {
-            claims.Add(new Claim(ClaimTypes.Email, user.Email));
             claims.Add(new Claim(ClaimTypes.Role,"User"));
         }
         

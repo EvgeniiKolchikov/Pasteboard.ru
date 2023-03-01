@@ -7,21 +7,29 @@
 <h2 class="text-center">Страница пользователя: @Model.Name</h2>
 <br/>
 
-<h3 class="text-center">Список моих карточек:</h3>
+<h3 class="text-center">Список моих визиток:</h3>
 <br/>
-<body class="text-center">
-@foreach (var pasteboard in Model.Pasteboards)
-{
-    <a href="@Url.Action("ShowPasteboard", "Pasteboard", new { pasteboard.Id })">
-        @pasteboard.Name
-    </a>
-    <br/>
-    <a class="btn btn-outline-secondary" type="button"
-            href=@Url.Action("EditPasteboard", "Pasteboard", new { pasteboard.Id })>Изменить</a>
-    <a class="btn btn-outline-secondary" type="button" >Удалить</a>
-    <br/>
-}
-</body>
-<button class="btn btn-outline-secondary gap-2 col-3 mx-auto" type="button"
-        onclick="location.href='@Url.Action("CreatePasteboard", "Pasteboard")'">Добавить</button>
-
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col"></th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+    </tr>
+    </thead>
+    <tbody>
+    @for (int i = 0; i < Model.Pasteboards.Count;i++)
+    {
+       <tr>
+            <th scope="row"><div class="text-dark nav-link">@(i + 1)</div></th>
+            <td><div class="text-dark nav-link">@Model.Pasteboards[i].Name</div></td>
+            <td><a class="text-dark nav-link" href="@Url.Action("ShowPasteboard","Pasteboard", new{@Model.Pasteboards[i].Id})">Просмотреть</a></td>
+            <td><a class="text-dark nav-link" href="@Url.Action("EditPasteboard","Pasteboard", new{@Model.Pasteboards[i].Id})">Редактировать</a></td>
+            <td><a class="text-dark nav-link" href="@Url.Action("DeletePasteboard","Pasteboard",new{@Model.Pasteboards[i].Id})">Удалить</a></td>
+        </tr>
+    }
+    </tbody>
+</table>
+<a class="nav-link text-dark" href="@Url.Action("CreatePasteboard","Pasteboard")">Добавить визитку</a>

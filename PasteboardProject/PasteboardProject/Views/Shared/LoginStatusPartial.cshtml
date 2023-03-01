@@ -1,19 +1,28 @@
-<div>
+@using System.Security.Claims
+@{
+    var email = User.FindFirstValue(ClaimTypes.Email);
+}
+
+<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
     @if (User.Identity.IsAuthenticated)
     {
-        <div id="authorized" class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+        <div>
             <ul class="navbar-nav flex-grow-1">
                 <li class="nav-item">
-                    <form asp-action="Logout" asp-controller="User" method="post">
-                        <button type="submit">Выйти</button>
-                    </form>
+                    <a class="text-dark nav-link"
+                       href="@Url.Action("EditUser", "User")">
+                        Настройки
+                    </a>
+                </li>
+                <li class="nav-item">
+                   <a class="nav-link text-dark" href="@Url.Action("Logout","User")">Выйти</a>
                 </li>
             </ul>
         </div>
     }
     else
     {
-        <div id="non-authorized" class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+        <div>
             <ul class="navbar-nav flex-grow-1">
                 <li class="nav-item">
                     <a class="nav-link text-dark" asp-controller="User" asp-action="Login">Вход</a>

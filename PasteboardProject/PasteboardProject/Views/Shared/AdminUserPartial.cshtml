@@ -1,0 +1,17 @@
+@using System.Security.Claims
+@if (User.FindFirstValue(ClaimTypes.Role) == "Administrator")
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark" href="@Url.Action("AdminPage", "User")">AdminPage</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" href="@Url.Action("UserPage", "User")">@User.FindFirstValue(ClaimTypes.Email)</a>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark" href="@Url.Action("UserPage", "User")">@User.FindFirstValue(ClaimTypes.Email)</a>
+    </li>
+}
+
