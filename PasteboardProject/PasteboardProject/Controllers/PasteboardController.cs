@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
+using NLog.Fluent;
 using PasteboardProject.Exceptions;
 using PasteboardProject.Interfaces;
 using PasteboardProject.Models;
@@ -27,6 +28,7 @@ public class PasteboardController : Controller
     [Route("{id}")]
     public async Task<IActionResult> ShowPasteboard(string id)
     {
+        Log.Debug($"Метод Show Pasteboard index = {id}");
         try
         {
             var pasteboardById = await _pasteboardRepository.GetPasteboardByIdAsync(id);
@@ -47,14 +49,13 @@ public class PasteboardController : Controller
     
     [HttpGet]
     [Route("create")]
-    public IActionResult CreatePasteboard()
+    public IActionResult CreatePasteboardAsync()
     {
-        Logger.Debug($"This is CreatePasteboard Action: Get");
+        Logger.Debug($"This is CreatePasteboardAsync Action: Get");
         var activePasteboardFields = new List<ActivePasteboardField>();
         var pasteboardViewModel = new PasteboardViewModel()
         {
-            Id = 0,
-            AspAction = "CreatePasteboard",
+            AspAction = "CreatePasteboardAsync",
             ActivePasteboardFields = AddEmptyFields(activePasteboardFields)
         };
         return View("CreateEditPasteboard",pasteboardViewModel);
@@ -62,20 +63,19 @@ public class PasteboardController : Controller
     
     [HttpPost]
     [Route("create")]
-    public async Task<IActionResult> CreatePasteboard(PasteboardViewModel pasteboardViewModel)
+    public async Task<IActionResult> CreatePasteboardAsync(PasteboardViewModel pasteboardViewModel)
     {
-        Logger.Debug($"This is CreatePasteboard Action: Post");
+        Logger.Debug($"This is CreatePasteboardAsync Action: Post");
         var pasteboard = DeleteEmptyFields(pasteboardViewModel);
         var userEmail = User.FindFirstValue(ClaimTypes.Email);
         
         await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard, userEmail);
-        var id = pasteboard.Id;
         return View("ShowPasteboard", pasteboard);
     }
     
     [HttpGet]
     [Route("edit/{id}")]
-    public async Task<IActionResult> EditPasteboard(string id)
+    public async Task<IActionResult> EditPasteboardAsync(string id)
     {
         Logger.Debug($"This is EditPasteboard Action: Get");
         try
@@ -105,7 +105,7 @@ public class PasteboardController : Controller
     
     [HttpPost]
     [Route("edit/")]
-    public async Task<IActionResult> EditPasteboard(PasteboardViewModel pasteboardViewModel)
+    public async Task<IActionResult> EditPasteboardAsync(PasteboardViewModel pasteboardViewModel)
     {
         try
         {
@@ -118,16 +118,35 @@ public class PasteboardController : Controller
         }
         catch (Exception e)
         {
+            Logger.Error($"Exception: {e.Message} {e.Data} {e.StackTrace}");
             return View("~/Views/Error/ErrorPage.cshtml", e.Message);
         }
     }
     
     [HttpGet("delete")]
-    public async Task<IActionResult> DeletePasteboard(string id)
+    public async Task<IActionResult> DeletePasteboardAsync(string id)
     {
         try
         {
-            await _pasteboardRepository.DeletePasteboardAsync(id);
+            Log.Debug("This is DeletePasteboard Action: Get");
+            var pasteboard = await _pasteboardRepository.GetPasteboardByIdAsync(id);
+            return View("DeletePasteboard",pasteboard);
+        }
+        catch (Exception e)
+        {
+            Logger.Error($"Exception: {e.Message} {e.Data} {e.StackTrace}");
+            return View("~/Views/Error/ErrorPage.cshtml", e.Message);
+        }
+    }
+    
+    [HttpPost("delete")]
+    public async Task<IActionResult> DeletePasteboardAsync(Pasteboard pasteboard)
+    {
+        Log.Debug("This is DeletePasteboard Action: Post");
+        try
+        {
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+            await _pasteboardRepository.DeletePasteboardAsync(pasteboard,userEmail);
             return RedirectToAction("UserPage", "User");
         }
         catch (Exception e)

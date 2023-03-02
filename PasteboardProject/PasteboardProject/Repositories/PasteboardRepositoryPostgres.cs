@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NLog;
+using NLog.Fluent;
 using PasteboardProject.Context;
 using PasteboardProject.Exceptions;
 using PasteboardProject.Interfaces;
@@ -84,17 +85,20 @@ public class PasteboardRepositoryPostgres : IPasteboardRepository
         }
     }
 
-    public async Task DeletePasteboardAsync(string id)
+    public async Task DeletePasteboardAsync(Pasteboard pasteboard, string userEmail)
     {
-        var isInt = int.TryParse(id, out int result);
-        if (isInt)
+        Log.Debug($"Deleted Pasteboard {pasteboard.Id} - {pasteboard.Name}");
+        var user = _db.Users.FirstOrDefault(u => u.Email == userEmail);
+        if ( user != null && pasteboard.UserId == user.Id)
         {
-            var pasteboard = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Id == result);
-            if (pasteboard == null) throw new CustomException(CustomException.PasteboardNotFoundMessage);
-            _db.Pasteboards.Remove(pasteboard);
+            pasteboard.IsDeleted = true;
+            _db.Pasteboards.Update(pasteboard);
             await _db.SaveChangesAsync();
         }
-        else throw new CustomException(CustomException.DefaultMessage);
+        else
+        {
+            throw new CustomException(CustomException.PasteboardNotFoundMessage);
+        }
     }
 
     private async Task AddToDataBaseAsync(Pasteboard pasteboard)

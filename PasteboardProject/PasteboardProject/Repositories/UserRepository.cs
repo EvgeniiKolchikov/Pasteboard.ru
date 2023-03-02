@@ -49,7 +49,7 @@ public class UserRepository : IUserRepository
         {
             Name = user.Name,
             Email = user.Email,
-            Pasteboards = await _db.Pasteboards.Where(p => p.UserId == user.Id).ToListAsync()
+            Pasteboards = await _db.Pasteboards.Where(p => p.UserId == user.Id && p.IsDeleted == false).ToListAsync()
         };
         return userViewModel;
     }

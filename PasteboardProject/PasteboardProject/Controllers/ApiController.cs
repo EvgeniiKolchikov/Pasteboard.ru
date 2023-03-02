@@ -46,7 +46,7 @@ public class ApiController : Controller
     [Route("pasteboard/create")]
     public async Task CreatePasteboard([FromBody]Pasteboard pasteboard)
     {
-        Logger.Debug("CreatePasteboard Action");
+        Logger.Debug("CreatePasteboardAsync Action");
         try
         {
             var userName = HttpContext.User.Identity.Name;

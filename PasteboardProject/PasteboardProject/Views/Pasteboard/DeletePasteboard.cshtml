@@ -1,0 +1,17 @@
+@model PasteboardProject.Models.Pasteboard
+
+@{
+    Layout = "_Layout";
+}
+
+<div class="text-center">
+    <form asp-action="DeletePasteboard" asp-controller="Pasteboard" method="post">
+        <label>Вы действиетельно хотите удалить вашу визитку?</label>
+        <input type="hidden" asp-for="Id"/>
+        <input type="hidden" asp-for="Name"/>
+        <input type="hidden" asp-for="PasteboardFields"/>
+        <input type="hidden" asp-for="UserId"/>
+        <a href="@Url.Action("UserPage","User")">Я передумал</a>
+        <button type="submit">Да, удалить</button>
+    </form>
+</div>
