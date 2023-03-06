@@ -8,14 +8,19 @@
         <input type="text" asp-for="Email" class="form-control">
         <span asp-validation-for="Email" class="text-danger"></span>
         <div class="form-text">Введите адрес эл.почты</div>
-        
     </div>
-    <div>
-        <label class="form-label">Пароль</label>
-        <input type="password" asp-for="Password" class="form-control">
-        <span asp-validation-for="Password" class="text-danger"></span>
-        <div class="form-text">Введите пароль</div>
-    </div>
+      <div>
+          <label class="form-label">Пароль</label>
+          <input type="password" asp-for="Password" class="form-control">
+          <span asp-validation-for="Password" class="text-danger"></span>
+          <div class="form-text">Введите пароль</div>
+      </div>
+      <div>
+          <a href="@Url.Action("RestorePassword")" id="ember118">
+                Напомнить пароль
+              </a>
+      </div>
+      
       <button type="submit" class="btn btn-primary btn-lg">Вход</button>
       <a href="@Url.Action("Register")" class="btn btn-secondary btn-lg" >Регистрация </a>
   </div>

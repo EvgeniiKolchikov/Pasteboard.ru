@@ -87,7 +87,7 @@ public class PasteboardRepositoryPostgres : IPasteboardRepository
 
     public async Task DeletePasteboardAsync(Pasteboard pasteboard, string userEmail)
     {
-        Log.Debug($"Deleted Pasteboard {pasteboard.Id} - {pasteboard.Name}");
+        Log.Debug($"Deleted Pasteboard {pasteboard?.Id} - {pasteboard?.Name}");
         var user = _db.Users.FirstOrDefault(u => u.Email == userEmail);
         if ( user != null && pasteboard.UserId == user.Id)
         {

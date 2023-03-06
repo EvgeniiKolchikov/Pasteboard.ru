@@ -70,31 +70,42 @@ public class UserController : Controller
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginViewModel loginViewModel)
     {
-        try
+        if (ModelState.IsValid)
         {
-            var userViewModel = await _userRepository.GetUserViewModelLoginAsync(loginViewModel);
-            var token = GenerateToken(loginViewModel);
-            AddTokenToCookie(token);
-            return RedirectToAction("UserPage",new {userViewModel});
+            try
+            {
+                var userViewModel = await _userRepository.GetUserViewModelLoginAsync(loginViewModel);
+                var token = GenerateToken(loginViewModel);
+                AddTokenToCookie(token);
+                return RedirectToAction("UserPage", new { userViewModel });
+            }
+            catch (CustomException e)
+            {
+                ModelState.AddModelError("Password", "Неверный пароль или логин");
+                return View(loginViewModel);
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e.Message, e.Data, e.StackTrace);
+                return View("~/Views/Error/ErrorPage.cshtml", CustomException.DefaultMessage);
+            }
         }
-        catch (CustomException e)
-        {
-            return View(loginViewModel);
-        }
-        catch (Exception e)
-        {
-            Logger.Error(e.Message, e.Data, e.StackTrace);
-            return View("~/Views/Error/ErrorPage.cshtml", CustomException.DefaultMessage);
-        }
+        
+        return View(loginViewModel);
     }
 
-    
+
     [Authorize]
     [HttpGet("logout")]
     public IActionResult Logout()
     {
         DeleteTokenFromCookie();
         return RedirectToAction("Index","Home");
+    }
+    
+    public IActionResult RestorePassword()
+    {
+        return View();
     }
 
     [Authorize]
