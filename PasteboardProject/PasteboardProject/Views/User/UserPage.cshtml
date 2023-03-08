@@ -17,6 +17,7 @@
         <th scope="col"></th>
         <th scope="col"></th>
         <th scope="col"></th>
+        <th scope="col"></th>
     </tr>
     </thead>
     <tbody>
@@ -28,6 +29,7 @@
             <td><a class="text-dark nav-link" href="@Url.Action("ShowPasteboard","Pasteboard", new{@Model.Pasteboards[i].Id})">Просмотреть</a></td>
             <td><a class="text-dark nav-link" href="@Url.Action("EditPasteboard","Pasteboard", new{@Model.Pasteboards[i].Id})">Редактировать</a></td>
             <td><a class="text-dark nav-link" href="@Url.Action("DeletePasteboard","Pasteboard",new{@Model.Pasteboards[i].Id})">Удалить</a></td>
+            <td><a class="text-dark nav-link" href="@Url.Action("ShowVisits","Pasteboard",new{@Model.Pasteboards[i].Id})">Статистика</a></td>
         </tr>
     }
     </tbody>

@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NLog;
@@ -23,6 +24,7 @@ try
         options.UseNpgsql(connection).UseLowerCaseNamingConvention());
     builder.Services.AddTransient<IPasteboardRepository, PasteboardRepositoryPostgres>();
     builder.Services.AddTransient<IUserRepository, UserRepository>();
+    builder.Services.AddTransient<IVisitorRepository, PasteboardVisitorRepository>();
     builder.Services.AddControllersWithViews();
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
@@ -75,7 +77,7 @@ try
     }
 
     app.UseHttpsRedirection();
-
+    
     app.UseStaticFiles();
 
     app.UseCookiePolicy(new CookiePolicyOptions
@@ -101,6 +103,11 @@ try
     
     app.UseMiddleware<ResponseTimeMiddleware>();
 
+    app.UseForwardedHeaders(new ForwardedHeadersOptions
+    {
+        ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+    });
+    
     app.MapControllers();
 
     app.Run();

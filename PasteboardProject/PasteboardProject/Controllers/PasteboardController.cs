@@ -1,6 +1,9 @@
 using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NLog;
 using NLog.Fluent;
 using PasteboardProject.Exceptions;
@@ -12,14 +15,16 @@ using PasteboardProject.Repositories;
 namespace PasteboardProject.Controllers;
 
 [Authorize]
-[Route("[controller]")]
+[Route("pasteboard")]
 public class PasteboardController : Controller
 {
     private readonly IPasteboardRepository _pasteboardRepository;
+    private readonly IVisitorRepository _visitorRepository;
     private static readonly Logger Logger = LogManager.GetLogger("PasteboardController");
-    public PasteboardController(IPasteboardRepository pasteboardRepository)
+    public PasteboardController(IPasteboardRepository pasteboardRepository, IVisitorRepository visitorRepository)
     {
         _pasteboardRepository = pasteboardRepository;
+        _visitorRepository = visitorRepository;
         Logger.Debug("Logger Init");
     }
     
@@ -33,6 +38,18 @@ public class PasteboardController : Controller
         {
             var pasteboardById = await _pasteboardRepository.GetPasteboardByIdAsync(id);
             Logger.Debug($"This is Show Pasteboard Action: Id {id}, pasteboard name: {pasteboardById.Name}");
+            var ip = HttpContext.Connection.RemoteIpAddress.ToString();
+            var userAgent = HttpContext.Request.Headers["User-Agent"].FirstOrDefault();
+            var city = await GetCityFromIp(ip);
+            var pasteboardVisitor = new PasteboardVisitor
+            {
+                DateTime = DateTime.UtcNow,
+                City = city,
+                Ip = ip,
+                UserAgent = userAgent,
+                PasteboardId = pasteboardById.Id
+            };
+            await _visitorRepository.AddPasteboardVisitorToDataBase(pasteboardVisitor);
             return View(pasteboardById);
         }
         catch (CustomException e)
@@ -42,8 +59,8 @@ public class PasteboardController : Controller
         }
         catch (Exception e)
         {
-            Logger.Error($"Exception: {e.Message}");
-            return View("~/Views/Error/ErrorPage.cshtml", e.Message);
+            Logger.Error($"{e.Message} {e.StackTrace} {e.Data}");
+            return View("~/Views/Error/ErrorPage.cshtml", CustomException.DefaultMessage);
         }
     }
     
@@ -104,7 +121,7 @@ public class PasteboardController : Controller
     }
     
     [HttpPost]
-    [Route("edit/")]
+    [Route("edit")]
     public async Task<IActionResult> EditPasteboardAsync(PasteboardViewModel pasteboardViewModel)
     {
         try
@@ -154,6 +171,21 @@ public class PasteboardController : Controller
             return View("~/Views/Error/ErrorPage.cshtml", e.Message);
         }
     }
+    
+    [HttpGet("statistics")]
+    public async Task<IActionResult> ShowVisits(int id)
+    {
+        Log.Debug("This is ShowVisits Action: Get");
+        try
+        {
+            var visitors = await _visitorRepository.GetAllPasteboardVisitors(id);
+            return View("VisitStatistics",visitors);
+        }
+        catch (Exception)
+        {
+            return View("~/Views/Error/ErrorPage.cshtml", CustomException.DefaultMessage);
+        }
+    }
 
     private List<ActivePasteboardField> AddEmptyFields(List<ActivePasteboardField> activePasteboardField)
     {
@@ -200,4 +232,27 @@ public class PasteboardController : Controller
 
         return pasteboard;
     }
+
+    private async Task<string> GetCityFromIp(string ip)
+    {
+        if (ip == "::1")
+        {
+            return "LocalMachine";
+        }
+        var json = "";
+        var city = "";
+        using (var client = new HttpClient())
+        {
+            var apiUrl = $"http://ip-api.com/json/{ip}";
+            var response = await client.GetAsync(apiUrl);
+            response.EnsureSuccessStatusCode();
+            var result = await response.Content.ReadAsStringAsync();
+            var jsonData = (JObject)JsonConvert.DeserializeObject(result);
+            city = jsonData["city"].Value<string>();
+        }
+        return city;
+    }
+
+   
 }
+

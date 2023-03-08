@@ -1,0 +1,33 @@
+@model List<PasteboardProject.Models.ViewModels.PasteboardVisitorViewModel>
+
+@{
+    Layout = "_Layout";
+}
+
+<h2 class="text-center">Просмотры моей визитки</h2>
+<h3 class="text-center">Всего просмотров: @Model.Count</h3>
+<br/>
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col"> #</th>
+        <th scope="col"> Время</th>
+        <th scope="col"> Ip</th>
+        <th scope="col"> Город</th>
+        <th scope="col"> Браузер</th>
+    </tr>
+    </thead>
+    <tbody>
+    @for (int i = 0; i < Model.Count;i++)
+    {
+       <tr>
+            <th scope="row"><div class="text-dark nav-link">@(i + 1)</div></th>
+            <td><div class="text-dark nav-link">@Model[i].DateTime</div></td>
+            <td><div class="text-dark nav-link">@Model[i].Ip</div></td>
+            <td><div class="text-dark nav-link">@Model[i].City</div></td>
+            <td><div class="text-dark nav-link">@Model[i].UserAgent</div></td>
+       </tr>
+    }
+    </tbody>
+</table>
+

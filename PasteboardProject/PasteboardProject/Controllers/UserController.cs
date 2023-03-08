@@ -18,7 +18,7 @@ using PasteboardProject.Models.ViewModels;
 namespace PasteboardProject.Controllers;
 
 
-[Route("[controller]")]
+[Route("user")]
 public class UserController : Controller
 {
     private readonly IUserRepository _userRepository;
@@ -35,28 +35,31 @@ public class UserController : Controller
         Logger.Debug("User Controller in");
     }
     
-
     [HttpGet("register")]
     public IActionResult Register()
     {
         return View();
     }
     
- 
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterViewModel registerViewModel)
     {
+        if (!ModelState.IsValid) return View(registerViewModel);
         var userExist = await _userRepository.ExistUserInDataBaseAsync(registerViewModel);
-        if (userExist) return View(registerViewModel); // добавить exception
+        if (userExist)
+        {
+            ModelState.AddModelError("Email","Эл. почта уже существует, введите другой или войдите");
+            return View(registerViewModel); // добавить exception
+        }
         await _userRepository.AddUserToDataBaseAsync(registerViewModel);
         var token = GenerateToken(registerViewModel);
         AddTokenToCookie(token);
         var userViewModel = new UserViewModel()
-            {
-                Name = registerViewModel.Name, 
-                Email = registerViewModel.Email, 
-                Pasteboards = new List<Pasteboard>()
-            };
+        {
+            Name = registerViewModel.Name, 
+            Email = registerViewModel.Email, 
+            Pasteboards = new List<Pasteboard>()
+        };
         
         return RedirectToAction("UserPage", new {userViewModel});
     }
@@ -70,31 +73,27 @@ public class UserController : Controller
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginViewModel loginViewModel)
     {
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid) return View(loginViewModel);
+        try
         {
-            try
-            {
-                var userViewModel = await _userRepository.GetUserViewModelLoginAsync(loginViewModel);
-                var token = GenerateToken(loginViewModel);
-                AddTokenToCookie(token);
-                return RedirectToAction("UserPage", new { userViewModel });
-            }
-            catch (CustomException e)
-            {
-                ModelState.AddModelError("Password", "Неверный пароль или логин");
-                return View(loginViewModel);
-            }
-            catch (Exception e)
-            {
-                Logger.Error(e.Message, e.Data, e.StackTrace);
-                return View("~/Views/Error/ErrorPage.cshtml", CustomException.DefaultMessage);
-            }
+            var userViewModel = await _userRepository.GetUserViewModelLoginAsync(loginViewModel);
+            var token = GenerateToken(loginViewModel);
+            AddTokenToCookie(token);
+            return RedirectToAction("UserPage", new { userViewModel });
         }
-        
-        return View(loginViewModel);
+        catch (CustomException e)
+        {
+            ModelState.AddModelError("Email", "Неверный пароль или email");
+            ModelState.AddModelError("Password", "Неверный пароль или email");
+            return View(loginViewModel);
+        }
+        catch (Exception e)
+        {
+            Logger.Error(e.Message, e.Data, e.StackTrace);
+            return View("~/Views/Error/ErrorPage.cshtml", CustomException.DefaultMessage);
+        }
     }
-
-
+    
     [Authorize]
     [HttpGet("logout")]
     public IActionResult Logout()
@@ -103,6 +102,8 @@ public class UserController : Controller
         return RedirectToAction("Index","Home");
     }
     
+    [Authorize]
+    [HttpGet("restore")]
     public IActionResult RestorePassword()
     {
         return View();
@@ -123,6 +124,7 @@ public class UserController : Controller
     [HttpPost("edit")]
     public async Task<IActionResult> EditUser(EditViewModel editViewModel)
     {
+        if (!ModelState.IsValid) return View(editViewModel);
         await _userRepository.UpdateUserAsync(editViewModel);
         var userViewModel = await _userRepository.GetUserViewModelAuthorizedAsync(User.FindFirstValue(ClaimTypes.Email));
         return RedirectToAction("UserPage", new {userViewModel});
@@ -132,11 +134,19 @@ public class UserController : Controller
     [HttpGet("profile")]
     public async Task<IActionResult> UserPage()
     {
-        if (!User.Identity.IsAuthenticated)
-            return View("~/Views/Error/ErrorPage.cshtml", CustomException.AccessDeniedMessage);
-        var userViewModel = await _userRepository.GetUserViewModelAuthorizedAsync
-            (User.FindFirstValue(ClaimTypes.Email));
-        return View(userViewModel);
+        try
+        {
+            if (!User.Identity.IsAuthenticated)
+                return View("~/Views/Error/ErrorPage.cshtml", CustomException.AccessDeniedMessage);
+            var userViewModel = await _userRepository.GetUserViewModelAuthorizedAsync
+                (User.FindFirstValue(ClaimTypes.Email));
+            return View(userViewModel);
+        }
+        catch (Exception e)
+        {
+            Logger.Error(e.Message, e.Data, e.StackTrace);
+            return View("~/Views/Error/ErrorPage.cshtml", CustomException.DefaultMessage);
+        }
     }
 
     [Authorize(Roles = "Administrator")]

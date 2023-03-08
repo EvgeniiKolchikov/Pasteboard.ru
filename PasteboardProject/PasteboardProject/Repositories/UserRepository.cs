@@ -29,7 +29,7 @@ public class UserRepository : IUserRepository
         var hashPassword = GetHashPassword(loginViewModel.Email, loginViewModel.Password);
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == loginViewModel.Email && u.Password == hashPassword);
         if (user == null) throw new CustomException(CustomException.DefaultMessage);
-        user.LastVisitDateTime = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture);
+        user.LastVisitDateTime = DateTime.UtcNow;
         _db.Users.Update(user);
         await _db.SaveChangesAsync();
         var userViewModel = new UserViewModel
@@ -56,7 +56,7 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> ExistUserInDataBaseAsync(RegisterViewModel registerViewModel)
     {
-        return await _db.Users.AnyAsync(u => u.Email == registerViewModel.Email && u.Name == registerViewModel.Name);
+        return await _db.Users.AnyAsync(u => u.Email == registerViewModel.Email);
     }
     
     public async Task AddUserToDataBaseAsync(RegisterViewModel registerViewModel)
@@ -66,8 +66,8 @@ public class UserRepository : IUserRepository
             Name = registerViewModel.Name,
             Email = registerViewModel.Email,
             Password = GetHashPassword(registerViewModel.Email, registerViewModel.Password),
-            RegistrationDateTime = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture),
-            LastVisitDateTime = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)
+            RegistrationDateTime = DateTime.UtcNow,
+            LastVisitDateTime = DateTime.UtcNow
         };
         await _db.Users.AddAsync(user);
         await _db.SaveChangesAsync();
@@ -91,8 +91,8 @@ public class UserRepository : IUserRepository
         return await _db.Users.Select(u => new UsersListViewModel
         {
             Email = u.Email,
-            RegistrationDate = u.RegistrationDateTime,
-            LastVisitDate = u.LastVisitDateTime
+            RegistrationDate = u.RegistrationDateTime.ToLocalTime(),
+            LastVisitDate = u.LastVisitDateTime.ToLocalTime()
         }).ToListAsync();
     }
 
