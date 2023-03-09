@@ -20,4 +20,10 @@ public class HomeController : Controller
     {
         return View();
     }
+    
+    [HttpGet("policy")]
+    public IActionResult Policy()
+    {
+        return View();
+    }
 }

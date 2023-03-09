@@ -11,4 +11,7 @@ public interface IUserRepository
     Task AddUserToDataBaseAsync(RegisterViewModel registerViewModel);
     Task UpdateUserAsync(EditViewModel editViewModel);
     Task<List<UsersListViewModel>> GetUserListAsync();
+    Task<bool> UserTokenConfirmation(string token);
+    Task<string> GetUserToken(string userEmail);
+    Task<bool> EmailConfirmedCheck(string userEmail);
 }

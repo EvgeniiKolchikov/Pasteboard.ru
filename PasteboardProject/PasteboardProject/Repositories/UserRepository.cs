@@ -67,7 +67,9 @@ public class UserRepository : IUserRepository
             Email = registerViewModel.Email,
             Password = GetHashPassword(registerViewModel.Email, registerViewModel.Password),
             RegistrationDateTime = DateTime.UtcNow,
-            LastVisitDateTime = DateTime.UtcNow
+            LastVisitDateTime = DateTime.UtcNow,
+            EmailConfirmationToken = CreateUserToken(registerViewModel.Email),
+            ConfirmedEmail = false
         };
         await _db.Users.AddAsync(user);
         await _db.SaveChangesAsync();
@@ -96,14 +98,44 @@ public class UserRepository : IUserRepository
         }).ToListAsync();
     }
 
-    private string GetHashPassword(string userName, string password)
+    public async Task<string> GetUserToken(string userEmail)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+        if (user == null) throw new CustomException(CustomException.UserNotFoundMessage);
+        return user.EmailConfirmationToken;
+    }
+
+    public async Task<bool> EmailConfirmedCheck(string userEmail)
+    {
+       var emailConfirmed = await _db.Users.FirstOrDefaultAsync(u => u.Email == userEmail && u.ConfirmedEmail == true);
+       if (emailConfirmed == null) return false;
+       return true;
+    }
+    public async Task<bool> UserTokenConfirmation(string token)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.EmailConfirmationToken == token);
+        if (user == null) return false;
+        user.ConfirmedEmail = true;
+        _db.Users.Update(user);
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
+    private string GetHashPassword(string userEmail, string password)
     { 
         var passwordHashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(password,
-            Encoding.ASCII.GetBytes(Salt + userName),        
+            Encoding.ASCII.GetBytes(Salt + userEmail),        
             KeyDerivationPrf.HMACSHA256,        
             148, 410 / 7));
         return passwordHashed;
     }
 
-   
+    private string CreateUserToken(string userEmail)
+    {
+        return  Convert.ToBase64String(KeyDerivation.Pbkdf2(userEmail,
+            Encoding.ASCII.GetBytes(Salt),        
+            KeyDerivationPrf.HMACSHA256,        
+            148, 410 / 7));
+    }
+    
 }

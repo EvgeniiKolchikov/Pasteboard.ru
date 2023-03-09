@@ -10,4 +10,6 @@ public class User
     public string Email { get; set; }
     public DateTime RegistrationDateTime { get; set; }
     public DateTime LastVisitDateTime { get; set; }
+    public bool ConfirmedEmail { get; set; }
+    public string EmailConfirmationToken { get; set; }
 }

@@ -37,6 +37,10 @@
             <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
             <div class="form-text">Введите пароль</div>
         </div>
+        
+        <div class="mb-3">
+            Нажимая на кнопку "Регистрация" вы соглашаетесь с <a class="text-dark" asp-controller="Home" asp-action="Policy">Условиями использования и Политикой конфиденциальности</a>
+        </div>
 
         <button type="submit" class="btn btn-primary btn-lg">Регистрация</button>
         <a href="@Url.Action("Login")" class="btn btn-secondary btn-lg" >Вход </a>

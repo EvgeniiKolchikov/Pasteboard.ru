@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication;
@@ -23,15 +24,17 @@ public class UserController : Controller
 {
     private readonly IUserRepository _userRepository;
     private readonly IConfiguration _configuration;
+    private readonly IEmailService _emailService;
     private static readonly Logger Logger = LogManager.GetLogger("UserController");
     private const int ExpireTokenTime = 60;
     private const int ExpireCookieTime = 60;
    
-    public UserController(IUserRepository userRepository, IConfiguration configuration)
+    public UserController(IUserRepository userRepository, IConfiguration configuration, IEmailService emailService)
     {
         _userRepository = userRepository;
         _configuration = configuration;
-       
+        _emailService = emailService;
+
         Logger.Debug("User Controller in");
     }
     
@@ -49,19 +52,16 @@ public class UserController : Controller
         if (userExist)
         {
             ModelState.AddModelError("Email","Эл. почта уже существует, введите другой или войдите");
-            return View(registerViewModel); // добавить exception
+            return View(registerViewModel);
         }
         await _userRepository.AddUserToDataBaseAsync(registerViewModel);
-        var token = GenerateToken(registerViewModel);
-        AddTokenToCookie(token);
-        var userViewModel = new UserViewModel()
-        {
-            Name = registerViewModel.Name, 
-            Email = registerViewModel.Email, 
-            Pasteboards = new List<Pasteboard>()
-        };
-        
-        return RedirectToAction("UserPage", new {userViewModel});
+        var subject = "Регистрация нового пользователя";
+        var emailToken = await _userRepository.GetUserToken(registerViewModel.Email);
+        var message = $"Перейдите по ссылке для активации пользователя: <a href=\"https://localhost:7257/user/verify/{emailToken}\">Активировать пользователя</a>";
+        await _emailService.SendEmailAsync(registerViewModel.Email,subject,message);
+
+        var id = "register";
+        return RedirectToAction("VerifyUser", new {id});
     }
 
     [HttpGet("login")]
@@ -77,11 +77,17 @@ public class UserController : Controller
         try
         {
             var userViewModel = await _userRepository.GetUserViewModelLoginAsync(loginViewModel);
+            var userEmailConfirmed = await _userRepository.EmailConfirmedCheck(loginViewModel.Email);
+            if (!userEmailConfirmed)
+            {
+                ModelState.AddModelError("Email","Выполните подтверждение аккаунта через эл.почту");
+                return View(loginViewModel);
+            }
             var token = GenerateToken(loginViewModel);
             AddTokenToCookie(token);
             return RedirectToAction("UserPage", new { userViewModel });
         }
-        catch (CustomException e)
+        catch (CustomException)
         {
             ModelState.AddModelError("Email", "Неверный пароль или email");
             ModelState.AddModelError("Password", "Неверный пароль или email");
@@ -102,13 +108,21 @@ public class UserController : Controller
         return RedirectToAction("Index","Home");
     }
     
-    [Authorize]
-    [HttpGet("restore")]
-    public IActionResult RestorePassword()
+    
+    
+    [HttpGet("verify/{id}")]
+    public async Task<IActionResult> VerifyUser(string id)
     {
-        return View();
+        if (id == "register")
+        {
+            return View("VerifyUser", "Подтвердите аккаунт через эл. почту");
+        }
+        var tokenConfirmed = await _userRepository.UserTokenConfirmation(id);
+        if (!tokenConfirmed) return View("~/Views/Error/ErrorPage.cshtml", CustomException.AccessDeniedMessage);
+        var message = "Подтверждение эл.почты прошло успешно, выполните вход для дальнейшей работы";
+        return View("VerifyUser",message);
     }
-
+    
     [Authorize]
     [HttpGet("edit")]
     public IActionResult EditUser()

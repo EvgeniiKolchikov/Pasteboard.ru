@@ -12,6 +12,7 @@ using PasteboardProject.Context;
 using PasteboardProject.Interfaces;
 using PasteboardProject.Middlewares;
 using PasteboardProject.Repositories;
+using PasteboardProject.Services;
 
 var logger = LogManager.Setup().LoadConfigurationFromFile("nlog.config").GetCurrentClassLogger();
 logger.Debug("init main");
@@ -25,6 +26,7 @@ try
     builder.Services.AddTransient<IPasteboardRepository, PasteboardRepositoryPostgres>();
     builder.Services.AddTransient<IUserRepository, UserRepository>();
     builder.Services.AddTransient<IVisitorRepository, PasteboardVisitorRepository>();
+    builder.Services.AddTransient<IEmailService, EmailService>();
     builder.Services.AddControllersWithViews();
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
@@ -101,7 +103,7 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
     
-    app.UseMiddleware<ResponseTimeMiddleware>();
+    //app.UseMiddleware<ResponseTimeMiddleware>();
 
     app.UseForwardedHeaders(new ForwardedHeadersOptions
     {
