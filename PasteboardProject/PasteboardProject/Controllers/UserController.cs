@@ -55,10 +55,8 @@ public class UserController : Controller
             return View(registerViewModel);
         }
         await _userRepository.AddUserToDataBaseAsync(registerViewModel);
-        var subject = "Регистрация нового пользователя";
         var emailToken = await _userRepository.GetUserToken(registerViewModel.Email);
-        var message = $"Перейдите по ссылке для активации пользователя: <a href=\"https://localhost:7257/user/verify/{emailToken}\">Активировать пользователя</a>";
-        await _emailService.SendEmailAsync(registerViewModel.Email,subject,message);
+        await _emailService.SendEmailAsync(registerViewModel.Email,emailToken);
 
         var id = "register";
         return RedirectToAction("VerifyUser", new {id});
