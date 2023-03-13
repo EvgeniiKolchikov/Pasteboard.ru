@@ -57,7 +57,6 @@ public class UserController : Controller
         await _userRepository.AddUserToDataBaseAsync(registerViewModel);
         var emailToken = await _userRepository.GetUserToken(registerViewModel.Email);
         await _emailService.SendEmailAsync(registerViewModel.Email,emailToken);
-
         var id = "register";
         return RedirectToAction("VerifyUser", new {id});
     }
