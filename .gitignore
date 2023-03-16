@@ -5,3 +5,4 @@ migrations/
 desktop.ini
 Learning.sln.DotSettings.user
 .vs/
+appsettings.json
