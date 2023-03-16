@@ -121,7 +121,7 @@ public class PasteboardController : Controller
     }
     
     [HttpPost]
-    [Route("edit")]
+    [Route("edit/{id}")]
     public async Task<IActionResult> EditPasteboardAsync(PasteboardViewModel pasteboardViewModel)
     {
         try
@@ -130,8 +130,7 @@ public class PasteboardController : Controller
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
             var pasteboard = DeleteEmptyFields(pasteboardViewModel);
             await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard, userEmail);
-            var id = pasteboard.Id;
-            return RedirectToAction("ShowPasteboard", new{id});
+            return RedirectToAction("ShowPasteboard", new{pasteboard.Id});
         }
         catch (Exception e)
         {
