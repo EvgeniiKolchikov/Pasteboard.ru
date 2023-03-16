@@ -8,7 +8,6 @@ namespace PasteboardProject.Services;
 public class EmailService : IEmailService
 {
     private readonly string _name = "Регистрациа на сайте Pasteboard.ru";
-    private readonly string _emailAddress = "registration@pasteboard.ru";
     private readonly string _subject = "Регистрация нового пользователя";
     private readonly IConfiguration _configuration;
     public EmailService(IConfiguration configuration)
@@ -18,6 +17,7 @@ public class EmailService : IEmailService
     
     public async Task SendEmailAsync(string email, string emailToken)
     {
+        var _emailAddress = _configuration["MailSettings:From"];
         using var emailMessage = new MimeMessage();
  
         emailMessage.From.Add(new MailboxAddress(_name, _emailAddress));

@@ -47,18 +47,26 @@ public class UserController : Controller
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterViewModel registerViewModel)
     {
-        if (!ModelState.IsValid) return View(registerViewModel);
-        var userExist = await _userRepository.ExistUserInDataBaseAsync(registerViewModel);
-        if (userExist)
+        try
         {
-            ModelState.AddModelError("Email","Эл. почта уже существует, введите другой или войдите");
-            return View(registerViewModel);
+            if (!ModelState.IsValid) return View(registerViewModel);
+            var userExist = await _userRepository.ExistUserInDataBaseAsync(registerViewModel);
+            if (userExist)
+            {
+                ModelState.AddModelError("Email","Эл. почта уже существует, введите другой или войдите");
+                return View(registerViewModel);
+            }
+            await _userRepository.AddUserToDataBaseAsync(registerViewModel);
+            var emailToken = await _userRepository.GetUserToken(registerViewModel.Email);
+            await _emailService.SendEmailAsync(registerViewModel.Email,emailToken);
+            var id = "register";
+            return RedirectToAction("VerifyUser", new {id});
         }
-        await _userRepository.AddUserToDataBaseAsync(registerViewModel);
-        var emailToken = await _userRepository.GetUserToken(registerViewModel.Email);
-        await _emailService.SendEmailAsync(registerViewModel.Email,emailToken);
-        var id = "register";
-        return RedirectToAction("VerifyUser", new {id});
+        catch (Exception e)
+        {
+            Logger.Error(e.Message, e.Data, e.StackTrace);
+            return View("~/Views/Error/ErrorPage.cshtml", CustomException.DefaultMessage);
+        }
     }
 
     [HttpGet("login")]
