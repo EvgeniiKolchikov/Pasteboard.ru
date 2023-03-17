@@ -202,6 +202,7 @@ public class UserController : Controller
 
     private void AddTokenToCookie(string token)
     {
+        DeleteTokenFromCookie();
         HttpContext.Response.Cookies.Append(".AspNetCore.PasteboardCookie", token, 
             new CookieOptions
             {
