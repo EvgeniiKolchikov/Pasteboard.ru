@@ -11,6 +11,7 @@ using PasteboardProject.Interfaces;
 using PasteboardProject.Models;
 using PasteboardProject.Models.ViewModels;
 using PasteboardProject.Repositories;
+using PasteboardProject.Services;
 
 namespace PasteboardProject.Controllers;
 
@@ -29,27 +30,17 @@ public class PasteboardController : Controller
     }
     
     [AllowAnonymous]
-    [HttpGet]
-    [Route("{id}")]
+    [HttpGet("{id}")]
     public async Task<IActionResult> ShowPasteboard(string id)
     {
         Log.Debug($"Метод Show Pasteboard index = {id}");
         try
         {
             var pasteboardById = await _pasteboardRepository.GetPasteboardByIdAsync(id);
-            Logger.Debug($"This is Show Pasteboard Action: Id {id}, pasteboard name: {pasteboardById.Name}");
-            var ip = HttpContext.Connection.RemoteIpAddress.ToString();
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
             var userAgent = HttpContext.Request.Headers["User-Agent"].FirstOrDefault();
-            var city = await GetCityFromIp(ip);
-            var pasteboardVisitor = new PasteboardVisitor
-            {
-                DateTime = DateTime.UtcNow,
-                City = city,
-                Ip = ip,
-                UserAgent = userAgent,
-                PasteboardId = pasteboardById.Id
-            };
-            await _visitorRepository.AddPasteboardVisitorToDataBase(pasteboardVisitor);
+            var city = await IpInformationService.GetCityFromIp(ip);
+            await _visitorRepository.AddPasteboardVisitorToDataBase(ip,city,userAgent,pasteboardById.Id);
             return View(pasteboardById);
         }
         catch (CustomException e)
@@ -64,45 +55,67 @@ public class PasteboardController : Controller
         }
     }
     
-    [HttpGet]
-    [Route("create")]
+    [HttpGet("create")]
     public IActionResult CreatePasteboardAsync()
     {
-        Logger.Debug($"This is CreatePasteboardAsync Action: Get");
-        var activePasteboardFields = new List<ActivePasteboardField>();
-        var pasteboardViewModel = new PasteboardViewModel()
+        try
         {
-            AspAction = "CreatePasteboardAsync",
-            ActivePasteboardFields = AddEmptyFields(activePasteboardFields)
-        };
-        return View("CreateEditPasteboard",pasteboardViewModel);
+            Logger.Debug($"This is CreatePasteboardAsync Action: Get");
+            var activePasteboardFields = new List<ActivePasteboardField>();
+            var pasteboardViewModel = new PasteboardViewModel
+            {
+                AspAction = "CreatePasteboardAsync",
+                ActivePasteboardFields = AddEmptyFields(activePasteboardFields)
+            };
+            return View("CreateEditPasteboard",pasteboardViewModel);
+        }
+        catch (CustomException e)
+        {
+            Logger.Error($"CustomException: {e.Message}");
+            return View("~/Views/Error/ErrorPage.cshtml", e.Message);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"{e.Data}{e.Message}{e.StackTrace}");
+            return View("~/Views/Error/ErrorPage.cshtml", CustomException.DefaultMessage);
+        }
     }
     
-    [HttpPost]
-    [Route("create")]
+    [HttpPost("create")]
     public async Task<IActionResult> CreatePasteboardAsync(PasteboardViewModel pasteboardViewModel)
     {
-        Logger.Debug($"This is CreatePasteboardAsync Action: Post");
-        var pasteboard = DeleteEmptyFields(pasteboardViewModel);
-        var userEmail = User.FindFirstValue(ClaimTypes.Email);
-        
-        await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard, userEmail);
-        return View("ShowPasteboard", pasteboard);
+        try
+        {
+            Logger.Debug($"This is CreatePasteboardAsync Action: Post");
+            var pasteboard = DeleteEmptyFields(pasteboardViewModel);
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+            await _pasteboardRepository.SendPasteboardToDataBaseAsync(pasteboard, userEmail);
+            return View("ShowPasteboard", pasteboard);
+        }
+        catch (CustomException e)
+        {
+            Logger.Error($"CustomException: {e.Message}");
+            return View("~/Views/Error/ErrorPage.cshtml", e.Message);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"{e.Data}{e.Message}{e.StackTrace}");
+            return View("~/Views/Error/ErrorPage.cshtml", CustomException.DefaultMessage);
+        }
     }
     
-    [HttpGet]
-    [Route("edit/{id}")]
+    [HttpGet("edit/{id}")]
     public async Task<IActionResult> EditPasteboardAsync(string id)
     {
         Logger.Debug($"This is EditPasteboard Action: Get");
         try
         {
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
-            var pasteboardById = await _pasteboardRepository.GetPasteboardByIdWithUserCheckAsync(id,userEmail);
-            var listActivePasteboardFields = pasteboardById.PasteboardFields.Select(pasteboardField => new ActivePasteboardField { FieldName = pasteboardField.FieldName, FieldValue = pasteboardField.FieldValue }).ToList();
+            var pasteboard = await _pasteboardRepository.GetPasteboardByIdWithUserCheckAsync(id,userEmail);
+            var listActivePasteboardFields = pasteboard.PasteboardFields.Select(pasteboardField => new ActivePasteboardField { FieldName = pasteboardField.FieldName, FieldValue = pasteboardField.FieldValue }).ToList();
             var pasteboardViewModel = new PasteboardViewModel
             {
-                Name = pasteboardById.Name,
+                Name = pasteboard.Name,
                 AspAction = "EditPasteboard",
                 ActivePasteboardFields = AddEmptyFields(listActivePasteboardFields)
             };
@@ -188,6 +201,7 @@ public class PasteboardController : Controller
 
     private List<ActivePasteboardField> AddEmptyFields(List<ActivePasteboardField> activePasteboardField)
     {
+        
         var maxFieldCount = 10;
         var activeFieldCount = activePasteboardField
             .Count(pf => pf.FieldName != null && pf.FieldValue != null);
@@ -232,25 +246,7 @@ public class PasteboardController : Controller
         return pasteboard;
     }
 
-    private async Task<string> GetCityFromIp(string ip)
-    {
-        if (ip == "::1")
-        {
-            return "LocalMachine";
-        }
-        var json = "";
-        var city = "";
-        using (var client = new HttpClient())
-        {
-            var apiUrl = $"http://ip-api.com/json/{ip}";
-            var response = await client.GetAsync(apiUrl);
-            response.EnsureSuccessStatusCode();
-            var result = await response.Content.ReadAsStringAsync();
-            var jsonData = (JObject)JsonConvert.DeserializeObject(result);
-            city = jsonData["city"].Value<string>();
-        }
-        return city;
-    }
+    
 
    
 }

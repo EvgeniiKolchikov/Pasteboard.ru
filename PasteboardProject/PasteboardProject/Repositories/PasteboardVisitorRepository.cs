@@ -15,8 +15,16 @@ public class PasteboardVisitorRepository : IVisitorRepository
         _db = context;
     }
 
-    public async Task AddPasteboardVisitorToDataBase(PasteboardVisitor pasteboardVisitor)
+    public async Task AddPasteboardVisitorToDataBase(string ipAdress, string city, string userAgent, int pasteboardId)
     {
+        var pasteboardVisitor = new PasteboardVisitor
+        {
+            DateTime = DateTime.UtcNow,
+            City = city,
+            Ip = ipAdress,
+            UserAgent = userAgent,
+            PasteboardId = pasteboardId
+        };
         await _db.AddAsync(pasteboardVisitor);
         await _db.SaveChangesAsync();
     }

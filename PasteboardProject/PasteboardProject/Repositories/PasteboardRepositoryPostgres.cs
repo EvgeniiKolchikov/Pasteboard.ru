@@ -72,7 +72,7 @@ public class PasteboardRepositoryPostgres : IPasteboardRepository
 
         Logger.Debug("Method SendPasteboardToDataBaseAsync");
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
-        if (user == null) throw new CustomException(CustomException.DefaultMessage);
+        if (user == null) throw new CustomException(CustomException.UserNotFoundMessage);
         pasteboard.UserId = user.Id;
         var pasteboardInDataBase = await _db.Pasteboards.FirstOrDefaultAsync(p => p.Id == pasteboard.Id);
         if (pasteboardInDataBase is null)
