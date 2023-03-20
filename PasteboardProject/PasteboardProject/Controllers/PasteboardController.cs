@@ -1,16 +1,12 @@
 using System.Security.Claims;
-using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using NLog;
 using NLog.Fluent;
 using PasteboardProject.Exceptions;
 using PasteboardProject.Interfaces;
 using PasteboardProject.Models;
 using PasteboardProject.Models.ViewModels;
-using PasteboardProject.Repositories;
 using PasteboardProject.Services;
 
 namespace PasteboardProject.Controllers;

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
-using NLog.Fluent;
 using PasteboardProject.Exceptions;
 using PasteboardProject.Interfaces;
 using PasteboardProject.Models;

@@ -1,4 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,7 +9,6 @@ using NLog;
 using NLog.Web;
 using PasteboardProject.Context;
 using PasteboardProject.Interfaces;
-using PasteboardProject.Middlewares;
 using PasteboardProject.Repositories;
 using PasteboardProject.Services;
 
@@ -26,7 +24,7 @@ try
     builder.Services.AddTransient<IPasteboardRepository, PasteboardRepositoryPostgres>();
     builder.Services.AddTransient<IUserRepository, UserRepository>();
     builder.Services.AddTransient<IVisitorRepository, PasteboardVisitorRepository>();
-    builder.Services.AddTransient<IEmailService, EmailService>();
+    builder.Services.AddTransient<IEmailService,EmailService>();
     builder.Services.AddControllersWithViews();
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
