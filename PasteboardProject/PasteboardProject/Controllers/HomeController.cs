@@ -10,8 +10,6 @@ public class HomeController : Controller
     [HttpGet("")]
     public IActionResult Index()
     {
-        ViewBag.Name = User.FindFirstValue(ClaimTypes.Email);
-        ViewBag.IsAuthenticated = User.Identity.IsAuthenticated;
         return View();
     }
 
