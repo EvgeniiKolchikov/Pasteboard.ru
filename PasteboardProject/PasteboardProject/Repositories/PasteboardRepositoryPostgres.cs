@@ -69,7 +69,6 @@ public class PasteboardRepositoryPostgres : IPasteboardRepository
 
     public async Task SendPasteboardToDataBaseAsync(Pasteboard pasteboard, string userEmail)
     {
-
         Logger.Debug("Method SendPasteboardToDataBaseAsync");
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
         if (user == null) throw new CustomException(CustomException.UserNotFoundMessage);
